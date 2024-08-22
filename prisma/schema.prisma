@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  first_name  String?   @default("")
+  middle_name String?   @default("")
+  last_name   String?   @default("")
+  email       String?   @unique
+  position    POSITION? @default(EMPLOYEE)
+
+  company_id    String?     @db.ObjectId
+  company       Company?    @relation("CompanyUser", fields: [company_id], references: [id])
+  department_id String?     @db.ObjectId
+  department    Department? @relation("DepartmentUser", fields: [department_id], references: [id])
+
+  company_president  Company?      @relation("CompanyPresident")
+  user_account       User_Account?
+  department_manager Department[]  @relation("DepartmentManagerUser")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum POSITION {
+  PRESIDENT
+  MANAGER
+  EMPLOYEE
+}
+
+model Company {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  description String?
+  location    String?
+
+  // Connection with user
+  president    User?   @relation("CompanyPresident", fields: [president_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  president_id String? @unique @db.ObjectId
+
+  // Relationship with department and user
+  departments   Department[]
+  users_company User[]       @relation("CompanyUser")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Department {
+  id   String  @id @default(auto()) @map("_id") @db.ObjectId
+  name String?
+
+  company    Company? @relation(fields: [company_id], references: [id])
+  company_id String?  @db.ObjectId
+  manager    User?    @relation("DepartmentManagerUser", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager_id String?  @db.ObjectId
+
+  users_department User[] @relation("DepartmentUser")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model User_Account {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String? @unique
+  username String? @unique
+  password String?
+
+  user    User?    @relation(fields: [user_id], references: [id])
+  user_id String?  @unique @db.ObjectId
+  role    Role[]   @relation(fields: [role_id], references: [id])
+  role_id String[] @db.ObjectId
+
+  sessions Session?
+
+  notes Notes[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Role {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  permissions     Permission[]   @relation("RolePermissions")
+  user_account_id String[]       @db.ObjectId
+  user_account    User_Account[] @relation(fields: [user_account_id], references: [id])
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+}
+
+model Permission {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  module  MODULE
+  view    Boolean @default(false)
+  add     Boolean @default(false)
+  edit    Boolean @default(false)
+  delete  Boolean @default(false)
+  role_id String  @db.ObjectId
+  role    Role    @relation("RolePermissions", fields: [role_id], references: [id])
+
+  scope VIEW_SCOPE @default(OWN)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum MODULE {
+  USER_MANAGEMENT
+  DEPARTMENT_MANAGEMENT
+  COMPANY_MANAGEMENT
+  ROLE_MANAGEMENT
+}
+
+enum VIEW_SCOPE {
+  ALL
+  DEPARTMENT
+  COMPANY
+  OWN
+}
+
+model Session {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  access_token  String?  @unique
+  refresh_token String?  @unique
+  reset_token   String?  @unique
+  isLoggedOut   Boolean  @default(false)
+  expires_in    DateTime
+
+  user_account_id String       @unique @db.ObjectId
+  user_account    User_Account @relation(fields: [user_account_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Notes {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  description String?
+  logs        String?
+
+  user_account_id String?       @unique @db.ObjectId
+  user_account    User_Account? @relation(fields: [user_account_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}

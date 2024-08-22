@@ -1,0 +1,305 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Department {
+  id: String
+  name: String
+  company: Company
+  company_id: String
+  manager: User
+  manager_id: String
+  users_department: [User!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Company {
+  id: String
+  name: String
+  description: String
+  location: String
+  president: User
+  president_id: String
+  departments: [Department!]
+  user_company: [User!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Role {
+  id: String
+  name: String
+  permissions: [Permission!]
+  user_account_id: String
+  user_account: UserAccount
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Permission {
+  id: String
+  module: String
+  view: Boolean
+  add: Boolean
+  edit: Boolean
+  delete: Boolean
+  role_id: Boolean
+  role: Role
+  scope: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Session {
+  id: String
+  access_token: String
+  refresh_token: String
+  reset_token: String
+  isLoggedOut: Boolean
+  expires_in: DateTime
+  user_account_id: String
+  user_account: UserAccount
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type UserAccount {
+  id: String
+  email: String
+  username: String
+  password: String
+  user: User
+  user_id: String
+  role: Role
+  session: Session
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type User {
+  id: String
+  first_name: String
+  middle_name: String
+  last_name: String
+  email: String
+  position: String
+  company_id: String
+  company: Company
+  department_id: String
+  department: Department
+  company_president: Company
+  user_account: UserAccount
+  department_manager: [Department!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Query {
+  findAll: [User!]!
+  findOne(id: String!): User!
+  company(id: String!): Company!
+  department(id: String!): Department!
+  roles: [Role!]!
+  role(id: String!): Role!
+  session(id: String!): Session!
+  userAccount(id: String!): UserAccount!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: String!): User!
+  createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
+  removeCompany(id: String!): Company!
+  createDepartment(createDepartmentInput: CreateDepartmentInput!): Department!
+  updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): Department!
+  removeDepartment(id: String!): Department!
+  createRole(createRoleInput: CreateRoleInput!): Role!
+  updateRole(updateRoleInput: UpdateRoleInput!): Role!
+  removeRole(id: String!): Role!
+  createSession(createSessionInput: CreateSessionInput!): Session!
+  updateSession(updateSessionInput: UpdateSessionInput!): Session!
+  removeSession(id: String!): Session!
+  createUserAccount(createUserAccountInput: CreateUserAccountInput!): UserAccount!
+  updateUserAccount(updateUserAccountInput: UpdateUserAccountInput!): UserAccount!
+  removeUserAccount(id: String!): UserAccount!
+}
+
+input CreateUserInput {
+  id: String
+  first_name: String
+  middle_name: String
+  last_name: String
+  email: String
+  position: String
+  company_id: String
+  company: CreateCompanyInput
+  department_id: String
+  department: CreateDepartmentInput
+  company_president: CreateCompanyInput
+  user_account: CreateUserAccountInput
+  department_manager: [CreateDepartmentInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateCompanyInput {
+  id: String
+  name: String
+  description: String
+  location: String
+  president: CreateUserInput
+  president_id: String
+  departments: [CreateDepartmentInput!]
+  user_company: [CreateUserInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateDepartmentInput {
+  id: String
+  name: String
+  company_id: String
+  manager_id: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateUserAccountInput {
+  id: String
+  email: String
+  username: String
+  password: String
+  user_id: String
+  user: CreateUserInput
+  role: CreateRoleInput
+  session: CreateSessionInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateRoleInput {
+  id: String
+  name: String
+  permissions: [CreatePermissionInput!]
+  user_account_id: String
+  user_account: CreateUserAccountInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreatePermissionInput {
+  id: String
+  module: String
+  view: Boolean
+  add: Boolean
+  edit: Boolean
+  delete: Boolean
+  role_id: Boolean
+  role: CreateRoleInput
+  scope: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateSessionInput {
+  id: String
+  access_token: String
+  refresh_token: String
+  reset_token: String
+  isLoggedOut: Boolean
+  expires_in: DateTime
+  user_account_id: String
+  user_account: CreateUserAccountInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateUserInput {
+  """The id of the user"""
+  id: String!
+  first_name: String
+  middle_name: String
+  last_name: String
+  email: String
+  position: String
+  company_id: String
+  company: CreateCompanyInput
+  department_id: String
+  department: CreateDepartmentInput
+  company_president: CreateCompanyInput
+  user_account: CreateUserAccountInput
+  department_manager: [CreateDepartmentInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateCompanyInput {
+  id: String
+  name: String
+  description: String
+  location: String
+  president: CreateUserInput
+  president_id: String
+  departments: [CreateDepartmentInput!]
+  user_company: [CreateUserInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateDepartmentInput {
+  id: String!
+  name: String
+  company_id: String
+  manager_id: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateRoleInput {
+  id: String
+  name: String
+  permissions: [CreatePermissionInput!]
+  user_account_id: String
+  user_account: CreateUserAccountInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateSessionInput {
+  id: String
+  access_token: String
+  refresh_token: String
+  reset_token: String
+  isLoggedOut: Boolean
+  expires_in: DateTime
+  user_account_id: String
+  user_account: CreateUserAccountInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateUserAccountInput {
+  id: String
+  email: String
+  username: String
+  password: String
+  user_id: String
+  user: CreateUserInput
+  role: CreateRoleInput
+  session: CreateSessionInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Subscription {
+  userCreated: User!
+  roleCreated: Role!
+}
