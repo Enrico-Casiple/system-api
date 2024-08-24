@@ -1,6 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { POSITION, User } from '@prisma/client';
-import { CreateCompanyInput } from 'src/tables/company/dto/create-company.input';
+import {
+  CreateCompanyInput,
+  CreateCompanyUserInput,
+} from 'src/tables/company/dto/create-company.input';
 import { CreateDepartmentInput } from 'src/tables/department/dto/create-department.input';
 import { CreateUserAccountInput } from 'src/tables/user-account/dto/create-user-account.input';
 
@@ -30,26 +33,26 @@ export class CreateUserInput implements User {
     nullable: true,
   })
   position: POSITION | null;
-  @Field(() => String, {
+  @Field(() => [String], {
     nullable: true,
   })
-  company_id: string | null;
-  @Field(() => CreateCompanyInput, {
+  company_id: string[] | null;
+  @Field(() => [CreateCompanyUserInput], {
     nullable: true,
   })
-  company: CreateCompanyInput;
-  @Field(() => String, {
+  companies: CreateCompanyUserInput[];
+  @Field(() => [String], {
     nullable: true,
   })
-  department_id: string | null;
-  @Field(() => CreateDepartmentInput, {
+  department_id: string[] | null;
+  @Field(() => [CreateCompanyUserInput], {
     nullable: true,
   })
-  department: CreateDepartmentInput;
-  @Field(() => CreateCompanyInput, {
+  departments: CreateCompanyUserInput[];
+  @Field(() => [CreateCompanyInput], {
     nullable: true,
   })
-  company_president: CreateCompanyInput;
+  company_president: CreateCompanyInput[];
   @Field(() => CreateUserAccountInput, {
     nullable: true,
   })

@@ -1,23 +1,33 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { CompanyService } from './company.service';
 import { Company } from './entities/company.entity';
 import { CreateCompanyInput } from './dto/create-company.input';
 import { UpdateCompanyInput } from './dto/update-company.input';
+import { PubSub } from 'graphql-subscriptions';
 
+const pubSub = new PubSub();
 @Resolver(() => Company)
 export class CompanyResolver {
   constructor(private readonly companyService: CompanyService) {}
 
   @Mutation(() => Company)
   createCompany(
+    @Args('currentUserId') currentUserId: string,
     @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
   ) {
-    return this.companyService.create(createCompanyInput);
+    const company = this.companyService.create(
+      createCompanyInput,
+      currentUserId,
+    );
+
+    pubSub.publish('companyAdded', { companyAdded: company });
+
+    return company;
   }
 
-  @Query(() => [Company], { name: 'company' })
-  findAll() {
-    return this.companyService.findAll();
+  @Query(() => [Company], { name: 'companies' })
+  findAll(@Args('currentUserId') currentUserId: string) {
+    return this.companyService.findAllByRolePermission(currentUserId);
   }
 
   @Query(() => Company, { name: 'company' })
@@ -27,16 +37,34 @@ export class CompanyResolver {
 
   @Mutation(() => Company)
   updateCompany(
+    @Args('currentUserId') currentUserId: string,
     @Args('updateCompanyInput') updateCompanyInput: UpdateCompanyInput,
   ) {
-    return this.companyService.update(
+    const company = this.companyService.update(
       updateCompanyInput.id,
       updateCompanyInput,
+      currentUserId,
     );
+
+    pubSub.publish('companyAdded', { companyAdded: company });
+
+    return company;
   }
 
   @Mutation(() => Company)
-  removeCompany(@Args('id', { type: () => String }) id: string) {
-    return this.companyService.remove(id);
+  removeCompany(
+    @Args('currentUserId') currentUserId: string,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    const company = this.companyService.remove(id, currentUserId);
+
+    pubSub.publish('companyAdded', { companyAdded: company });
+
+    return company;
+  }
+
+  @Subscription(() => Company)
+  companyAdded() {
+    return pubSub.asyncIterator('companyAdded');
   }
 }

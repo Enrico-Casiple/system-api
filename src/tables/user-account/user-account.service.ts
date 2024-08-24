@@ -31,8 +31,10 @@ export class UserAccountService {
           },
           user: {
             include: {
-              department: true,
-              company: true,
+              companies: true,
+              departments: true,
+              company_president: true,
+              department_manager: true,
             },
           },
         },

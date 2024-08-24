@@ -1,23 +1,31 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { DepartmentService } from './department.service';
 import { Department } from './entities/department.entity';
 import { CreateDepartmentInput } from './dto/create-department.input';
 import { UpdateDepartmentInput } from './dto/update-department.input';
+import { PubSub } from 'graphql-subscriptions';
 
+const pubSub = new PubSub();
 @Resolver(() => Department)
 export class DepartmentResolver {
   constructor(private readonly departmentService: DepartmentService) {}
 
   @Mutation(() => Department)
   createDepartment(
+    @Args('currentUserId') currentUserId: string,
     @Args('createDepartmentInput') createDepartmentInput: CreateDepartmentInput,
   ) {
-    return this.departmentService.create(createDepartmentInput);
+    const department = this.departmentService.create(
+      createDepartmentInput,
+      currentUserId,
+    );
+    pubSub.publish('departmentAdded', { departmentAdded: department });
+    return department;
   }
 
-  @Query(() => [Department], { name: 'department' })
-  findAll() {
-    return this.departmentService.findAll();
+  @Query(() => [Department], { name: 'departments' })
+  findAll(@Args('currentUserId') currentUserId: string) {
+    return this.departmentService.findAllByRolePermission(currentUserId);
   }
 
   @Query(() => Department, { name: 'department' })
@@ -27,16 +35,30 @@ export class DepartmentResolver {
 
   @Mutation(() => Department)
   updateDepartment(
+    @Args('currentUserId') currentUserId: string,
     @Args('updateDepartmentInput') updateDepartmentInput: UpdateDepartmentInput,
   ) {
-    return this.departmentService.update(
+    const department = this.departmentService.update(
       updateDepartmentInput.id,
       updateDepartmentInput,
+      currentUserId,
     );
+    pubSub.publish('departmentAdded', { departmentAdded: department });
+    return department;
   }
 
   @Mutation(() => Department)
-  removeDepartment(@Args('id', { type: () => String }) id: string) {
-    return this.departmentService.remove(id);
+  removeDepartment(
+    @Args('currentUserId') currentUserId: string,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    const department = this.departmentService.remove(id, currentUserId);
+    pubSub.publish('departmentAdded', { departmentAdded: department });
+    return department;
+  }
+
+  @Subscription(() => Department)
+  departmentAdded() {
+    return pubSub.asyncIterator('departmentAdded');
   }
 }

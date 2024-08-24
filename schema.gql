@@ -9,7 +9,8 @@ type Department {
   company_id: String
   manager: User
   manager_id: String
-  users_department: [User!]
+  department_users: [DepartmentUser!]
+  department_users_id: [String!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -19,15 +20,36 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DepartmentUser {
+  id: String
+  department_id: String
+  department: Department
+  user_id: String
+  user: User
+  created_at: DateTime
+  updated_at: DateTime
+}
+
 type Company {
   id: String
   name: String
+  short_name: String
   description: String
   location: String
   president: User
   president_id: String
   departments: [Department!]
-  user_company: [User!]
+  company_users: [CompanyUser!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type CompanyUser {
+  id: String
+  company_id: String
+  company: Company
+  user_id: String
+  user: User
   created_at: DateTime
   updated_at: DateTime
 }
@@ -36,8 +58,8 @@ type Role {
   id: String
   name: String
   permissions: [Permission!]
-  user_account_id: String
-  user_account: UserAccount
+  user_account_id: [String!]
+  user_account: [UserAccount!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -76,7 +98,8 @@ type UserAccount {
   password: String
   user: User
   user_id: String
-  role: Role
+  role: [Role!]
+  role_id: [String!]
   session: Session
   created_at: DateTime
   updated_at: DateTime
@@ -89,11 +112,11 @@ type User {
   last_name: String
   email: String
   position: String
-  company_id: String
-  company: Company
-  department_id: String
-  department: Department
-  company_president: Company
+  company_id: [String!]
+  companies: [CompanyUser!]
+  department_id: [String!]
+  department: [DepartmentUser!]
+  company_president: [Company!]
   user_account: UserAccount
   department_manager: [Department!]
   created_at: DateTime
@@ -103,11 +126,14 @@ type User {
 type Query {
   findAll: [User!]!
   findOne(id: String!): User!
+  companies(currentUserId: String!): [Company!]!
   company(id: String!): Company!
+  departments(currentUserId: String!): [Department!]!
   department(id: String!): Department!
   roles: [Role!]!
   role(id: String!): Role!
   session(id: String!): Session!
+  userAccounts: [UserAccount!]!
   userAccount(id: String!): UserAccount!
 }
 
@@ -115,12 +141,12 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): User!
-  createCompany(createCompanyInput: CreateCompanyInput!): Company!
-  updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
-  removeCompany(id: String!): Company!
-  createDepartment(createDepartmentInput: CreateDepartmentInput!): Department!
-  updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): Department!
-  removeDepartment(id: String!): Department!
+  createCompany(currentUserId: String!, createCompanyInput: CreateCompanyInput!): Company!
+  updateCompany(currentUserId: String!, updateCompanyInput: UpdateCompanyInput!): Company!
+  removeCompany(currentUserId: String!, id: String!): Company!
+  createDepartment(currentUserId: String!, createDepartmentInput: CreateDepartmentInput!): Department!
+  updateDepartment(currentUserId: String!, updateDepartmentInput: UpdateDepartmentInput!): Department!
+  removeDepartment(currentUserId: String!, id: String!): Department!
   createRole(createRoleInput: CreateRoleInput!): Role!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   removeRole(id: String!): Role!
@@ -139,13 +165,23 @@ input CreateUserInput {
   last_name: String
   email: String
   position: String
-  company_id: String
-  company: CreateCompanyInput
-  department_id: String
-  department: CreateDepartmentInput
-  company_president: CreateCompanyInput
+  company_id: [String!]
+  companies: [CreateCompanyUserInput!]
+  department_id: [String!]
+  departments: [CreateCompanyUserInput!]
+  company_president: [CreateCompanyInput!]
   user_account: CreateUserAccountInput
   department_manager: [CreateDepartmentInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateCompanyUserInput {
+  id: String
+  company_id: String
+  company: CreateCompanyInput
+  user_id: String
+  user: CreateUserInput
   created_at: DateTime
   updated_at: DateTime
 }
@@ -153,12 +189,13 @@ input CreateUserInput {
 input CreateCompanyInput {
   id: String
   name: String
+  short_name: String
   description: String
   location: String
   president: CreateUserInput
   president_id: String
   departments: [CreateDepartmentInput!]
-  user_company: [CreateUserInput!]
+  company_users: [CreateCompanyUserInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -166,8 +203,22 @@ input CreateCompanyInput {
 input CreateDepartmentInput {
   id: String
   name: String
+  company: CreateCompanyInput
   company_id: String
+  manager: CreateUserInput
   manager_id: String
+  department_users_id: String
+  department_users: [CreateDepartmentUserInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateDepartmentUserInput {
+  id: String
+  department_id: String
+  department: CreateDepartmentInput
+  user_id: String
+  user: CreateUserInput
   created_at: DateTime
   updated_at: DateTime
 }
@@ -180,6 +231,7 @@ input CreateUserAccountInput {
   user_id: String
   user: CreateUserInput
   role: CreateRoleInput
+  role_id: [String!]
   session: CreateSessionInput
   created_at: DateTime
   updated_at: DateTime
@@ -189,8 +241,8 @@ input CreateRoleInput {
   id: String
   name: String
   permissions: [CreatePermissionInput!]
-  user_account_id: String
-  user_account: CreateUserAccountInput
+  user_account_id: [String!]
+  user_account: [CreateUserAccountInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -230,11 +282,11 @@ input UpdateUserInput {
   last_name: String
   email: String
   position: String
-  company_id: String
-  company: CreateCompanyInput
-  department_id: String
-  department: CreateDepartmentInput
-  company_president: CreateCompanyInput
+  company_id: [String!]
+  companies: [CreateCompanyUserInput!]
+  department_id: [String!]
+  departments: [CreateCompanyUserInput!]
+  company_president: [CreateCompanyInput!]
   user_account: CreateUserAccountInput
   department_manager: [CreateDepartmentInput!]
   created_at: DateTime
@@ -244,12 +296,13 @@ input UpdateUserInput {
 input UpdateCompanyInput {
   id: String
   name: String
+  short_name: String
   description: String
   location: String
   president: CreateUserInput
   president_id: String
   departments: [CreateDepartmentInput!]
-  user_company: [CreateUserInput!]
+  company_users: [CreateCompanyUserInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -257,8 +310,12 @@ input UpdateCompanyInput {
 input UpdateDepartmentInput {
   id: String!
   name: String
+  company: CreateCompanyInput
   company_id: String
+  manager: CreateUserInput
   manager_id: String
+  department_users_id: String
+  department_users: [CreateDepartmentUserInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -267,8 +324,8 @@ input UpdateRoleInput {
   id: String
   name: String
   permissions: [CreatePermissionInput!]
-  user_account_id: String
-  user_account: CreateUserAccountInput
+  user_account_id: [String!]
+  user_account: [CreateUserAccountInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -294,6 +351,7 @@ input UpdateUserAccountInput {
   user_id: String
   user: CreateUserInput
   role: CreateRoleInput
+  role_id: [String!]
   session: CreateSessionInput
   created_at: DateTime
   updated_at: DateTime
@@ -301,5 +359,7 @@ input UpdateUserAccountInput {
 
 type Subscription {
   userCreated: User!
+  companyAdded: Company!
+  departmentAdded: Department!
   roleCreated: Role!
 }

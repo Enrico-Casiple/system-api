@@ -30,8 +30,18 @@ export class UserService {
           last_name: createUserInput.last_name,
           email: createUserInput.email,
           position: createUserInput.position,
-          company_id: createUserInput.company_id,
-          department_id: createUserInput.department_id,
+          companies: {
+            connect:
+              createUserInput.company_id?.map((id) => {
+                return { id: id };
+              }) || [],
+          },
+          departments: {
+            connect:
+              createUserInput.department_id?.map((id) => {
+                return { id: id };
+              }) || [],
+          },
           user_account: {
             create: {
               email: createUserInput.email,
@@ -42,8 +52,10 @@ export class UserService {
         },
         include: {
           user_account: true,
-          company: true,
-          department: true,
+          companies: true,
+          departments: true,
+          company_president: true,
+          department_manager: true,
         },
       });
       delete create_user.user_account.password;
@@ -61,8 +73,6 @@ export class UserService {
       const users = await this.prismaService.user.findMany({
         include: {
           user_account: true,
-          company: true,
-          department: true,
         },
       });
 
@@ -93,8 +103,10 @@ export class UserService {
         },
         include: {
           user_account: true,
-          company: true,
-          department: true,
+          companies: true,
+          departments: true,
+          company_president: true,
+          department_manager: true,
         },
       });
 
@@ -120,8 +132,6 @@ export class UserService {
         },
         include: {
           user_account: true,
-          company: true,
-          department: true,
         },
       });
 
@@ -145,6 +155,12 @@ export class UserService {
         this.logger.error('User not found', 'UserService.update()');
         throw new NotAcceptableException('User not found');
       }
+      const exsisting_company = await user.companies.find(
+        (company) => company.id,
+      );
+      const exsisting_department = await user.departments.find(
+        (department) => department.department_id,
+      );
 
       const update_user = await this.prismaService.user.update({
         where: {
@@ -156,8 +172,22 @@ export class UserService {
           last_name: updateUserInput.last_name,
           email: updateUserInput.email,
           position: updateUserInput.position,
-          company_id: updateUserInput.company_id,
-          department_id: updateUserInput.department_id,
+          companies: {
+            disconnect: exsisting_company,
+            connect: updateUserInput.company_id
+              ? updateUserInput.company_id.map((id) => {
+                  return { id: id };
+                })
+              : [],
+          },
+          departments: {
+            disconnect: exsisting_department,
+            connect: updateUserInput.department_id
+              ? updateUserInput.department_id.map((id) => {
+                  return { id: id };
+                })
+              : [],
+          },
           user_account: {
             update: {
               email: updateUserInput.email,
@@ -167,8 +197,6 @@ export class UserService {
         },
         include: {
           user_account: true,
-          company: true,
-          department: true,
         },
       });
 
@@ -195,8 +223,6 @@ export class UserService {
         },
         include: {
           user_account: true,
-          company: true,
-          department: true,
         },
       });
 

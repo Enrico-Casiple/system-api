@@ -21,14 +21,12 @@ model User {
   email       String?   @unique
   position    POSITION? @default(EMPLOYEE)
 
-  company_id    String?     @db.ObjectId
-  company       Company?    @relation("CompanyUser", fields: [company_id], references: [id])
-  department_id String?     @db.ObjectId
-  department    Department? @relation("DepartmentUser", fields: [department_id], references: [id])
+  company_president  Company[]         @relation("CompanyPresident")
+  department_manager Department[]      @relation("DepartmentManagerUser")
+  companies          Company_User[]    @relation("CompanyUser")
+  departments        Department_User[] @relation("DepartmentUser")
 
-  company_president  Company?      @relation("CompanyPresident")
-  user_account       User_Account?
-  department_manager Department[]  @relation("DepartmentManagerUser")
+  user_account User_Account?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -40,19 +38,42 @@ enum POSITION {
   EMPLOYEE
 }
 
+model Company_User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  company_id String  @db.ObjectId
+  company    Company @relation("Company", fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id    String? @db.ObjectId
+  user       User?   @relation("CompanyUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Department_User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  department_id String     @db.ObjectId
+  department    Department @relation("Department", fields: [department_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id       String?     @db.ObjectId
+  user          User?       @relation("DepartmentUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 model Company {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String?
+  short_name  String?
   description String?
   location    String?
 
-  // Connection with user
   president    User?   @relation("CompanyPresident", fields: [president_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  president_id String? @unique @db.ObjectId
+  president_id String? @db.ObjectId
 
-  // Relationship with department and user
   departments   Department[]
-  users_company User[]       @relation("CompanyUser")
+  company_users Company_User[] @relation("Company")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -67,7 +88,7 @@ model Department {
   manager    User?    @relation("DepartmentManagerUser", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   manager_id String?  @db.ObjectId
 
-  users_department User[] @relation("DepartmentUser")
+  department_users Department_User[] @relation("Department")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -79,7 +100,7 @@ model User_Account {
   username String? @unique
   password String?
 
-  user    User?    @relation(fields: [user_id], references: [id])
+  user    User?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id String?  @unique @db.ObjectId
   role    Role[]   @relation(fields: [role_id], references: [id])
   role_id String[] @db.ObjectId
@@ -110,7 +131,7 @@ model Permission {
   edit    Boolean @default(false)
   delete  Boolean @default(false)
   role_id String  @db.ObjectId
-  role    Role    @relation("RolePermissions", fields: [role_id], references: [id])
+  role    Role    @relation("RolePermissions", fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   scope VIEW_SCOPE @default(OWN)
 
@@ -136,7 +157,7 @@ model Session {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   access_token  String?  @unique
   refresh_token String?  @unique
-  reset_token   String?  @unique
+  reset_token   String?
   isLoggedOut   Boolean  @default(false)
   expires_in    DateTime
 

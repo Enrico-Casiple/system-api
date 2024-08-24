@@ -1,7 +1,13 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { POSITION, User as UserPrisma } from '@prisma/client';
-import { Company } from 'src/tables/company/entities/company.entity';
-import { Department } from 'src/tables/department/entities/department.entity';
+import {
+  Company,
+  CompanyUser,
+} from 'src/tables/company/entities/company.entity';
+import {
+  Department,
+  DepartmentUser,
+} from 'src/tables/department/entities/department.entity';
 import { UserAccount } from 'src/tables/user-account/entities/user-account.entity';
 
 @ObjectType()
@@ -30,26 +36,26 @@ export class User implements UserPrisma {
     nullable: true,
   })
   position: POSITION | null;
-  @Field(() => String, {
+  @Field(() => [String], {
     nullable: true,
   })
-  company_id: string | null;
-  @Field(() => Company, {
+  company_id: string[] | null;
+  @Field(() => [CompanyUser], {
     nullable: true,
   })
-  company: Company;
-  @Field(() => String, {
+  companies: CompanyUser[];
+  @Field(() => [String], {
     nullable: true,
   })
-  department_id: string | null;
-  @Field(() => Department, {
+  department_id: string[] | null;
+  @Field(() => [DepartmentUser], {
     nullable: true,
   })
-  department: Department;
-  @Field(() => Company, {
+  department: DepartmentUser[];
+  @Field(() => [Company], {
     nullable: true,
   })
-  company_president: Company;
+  company_president: Company[];
   @Field(() => UserAccount, {
     nullable: true,
   })
