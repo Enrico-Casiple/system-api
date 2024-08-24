@@ -106,11 +106,24 @@ model User_Account {
   role_id String[] @db.ObjectId
 
   sessions Session?
+  notes    Notes[]
 
-  notes Notes[]
+  // from next-auth
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
 }
 
 model Role {
@@ -170,6 +183,7 @@ model Session {
 
 model Notes {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
   description String?
   logs        String?
 

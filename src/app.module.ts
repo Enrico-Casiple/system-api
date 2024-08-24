@@ -14,6 +14,7 @@ import { DepartmentModule } from './tables/department/department.module';
 import { RoleModule } from './tables/role/role.module';
 import { SessionModule } from './tables/session/session.module';
 import { UserAccountModule } from './tables/user-account/user-account.module';
+import { NotesModule } from './tables/notes/notes.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { UserAccountModule } from './tables/user-account/user-account.module';
     RoleModule,
     SessionModule,
     UserAccountModule,
+    NotesModule,
   ],
   controllers: [],
   providers: [PrismaService, LoggersService],
