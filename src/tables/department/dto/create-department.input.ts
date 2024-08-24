@@ -17,8 +17,6 @@ export class CreateDepartmentInput implements Department {
   manager: CreateUserInput;
   @Field(() => String, { nullable: true })
   manager_id: string | null;
-  @Field(() => String, { nullable: true })
-  department_users_id: string | null;
   @Field(() => [CreateDepartmentUserInput], { nullable: true })
   department_users: CreateDepartmentUserInput[];
   @Field(() => Date, { nullable: true })

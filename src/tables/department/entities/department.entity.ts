@@ -22,8 +22,6 @@ export class Department implements PrismaDepartment {
   manager_id: string | null;
   @Field(() => [DepartmentUser], { nullable: true })
   department_users: DepartmentUser[];
-  @Field(() => [String], { nullable: true })
-  department_users_id: string[] | null;
   @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })

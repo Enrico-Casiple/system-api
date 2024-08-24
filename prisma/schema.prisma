@@ -55,8 +55,8 @@ model Department_User {
 
   department_id String     @db.ObjectId
   department    Department @relation("Department", fields: [department_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id       String?     @db.ObjectId
-  user          User?       @relation("DepartmentUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_id       String?    @db.ObjectId
+  user          User?      @relation("DepartmentUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
