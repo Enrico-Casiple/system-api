@@ -1,5 +1,6 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { User_Account } from '@prisma/client';
+import { Note } from 'src/tables/notes/entities/note.entity';
 import { Role } from 'src/tables/role/entities/role.entity';
 import { Session } from 'src/tables/session/entities/session.entity';
 import { User } from 'src/tables/user/entities/user.entity';
@@ -42,6 +43,48 @@ export class UserAccount implements User_Account {
     nullable: true,
   })
   session: Session;
+  @Field(() => [Note], {
+    nullable: true,
+  })
+  notes: Note[];
+  @Field(() => String, {
+    nullable: true,
+  })
+  type: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  provider: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  providerAccountId: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  refresh_token: string;
+  @Field(() => String, { nullable: true })
+  access_token: string;
+  @Field(() => Int, {
+    nullable: true,
+  })
+  expires_at: number;
+  @Field(() => String, {
+    nullable: true,
+  })
+  token_type: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  scope: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  id_token: string;
+  @Field(() => String, {
+    nullable: true,
+  })
+  session_state: string;
   @Field(() => Date, {
     nullable: true,
   })

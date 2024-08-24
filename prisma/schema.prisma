@@ -20,6 +20,8 @@ model User {
   last_name   String?   @default("")
   email       String?   @unique
   position    POSITION? @default(EMPLOYEE)
+  emailVerified DateTime?
+  image         String?
 
   company_president  Company[]         @relation("CompanyPresident")
   department_manager Department[]      @relation("DepartmentManagerUser")
