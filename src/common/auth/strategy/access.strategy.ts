@@ -1,16 +1,10 @@
-import {
-  BadRequestException,
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { LoggersService } from 'src/common/log/log.service';
 import { Hidden_Info } from 'src/common/utility/utility.service';
 import { UserAccountService } from '../../../tables/user-account/user-account.service';
-import { GqlExecutionContext } from '@nestjs/graphql';
-import { Request } from 'express';
 
 @Injectable()
 export class AccessStrategy extends PassportStrategy(Strategy, 'jwt-access') {
@@ -26,26 +20,16 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'jwt-access') {
     });
   }
 
-  getRequest(context: ExecutionContext) {
-    const ctx = GqlExecutionContext.create(context);
-    return ctx.getContext().req;
-  }
-
-  async validate(request: Request, payload: Hidden_Info) {
+  async validate(payload: Hidden_Info) {
     try {
       const { user_account_id } = payload;
-
-      const access_token = request.headers.authorization.split(' ')[1];
 
       const user_account =
         await this.userAccountService.findOne(user_account_id);
 
       delete user_account.password;
 
-      if (
-        !user_account.sessions ||
-        user_account.sessions.access_token !== access_token
-      ) {
+      if (!user_account.sessions) {
         this.loggersService.error(
           'Invalid access token',
           'AccessStrategy.validate',
