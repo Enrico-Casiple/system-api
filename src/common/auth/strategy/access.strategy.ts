@@ -22,10 +22,9 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'jwt-access') {
 
   async validate(payload: Hidden_Info) {
     try {
-      const { user_account_id } = payload;
-
-      const user_account =
-        await this.userAccountService.findOne(user_account_id);
+      const user_account = await this.userAccountService.findOne(
+        payload.user_account_id,
+      );
 
       delete user_account.password;
 
