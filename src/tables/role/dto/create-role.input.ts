@@ -68,6 +68,10 @@ export class CreatePermissionInput implements Permission {
   @Field(() => Boolean, {
     nullable: true,
   })
+  verify: boolean;
+  @Field(() => String, {
+    nullable: true,
+  })
   role_id: string;
   @Field(() => CreateRoleInput, {
     nullable: true,

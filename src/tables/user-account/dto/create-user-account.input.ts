@@ -26,6 +26,10 @@ export class CreateUserAccountInput implements User_Account {
   @Field(() => String, {
     nullable: true,
   })
+  confirm_password: string | null;
+  @Field(() => String, {
+    nullable: true,
+  })
   user_id: string | null;
   @Field(() => CreateUserInput, {
     nullable: true,
@@ -42,7 +46,7 @@ export class CreateUserAccountInput implements User_Account {
   @Field(() => CreateSessionInput, {
     nullable: true,
   })
-  session: CreateSessionInput;
+  sessions: CreateSessionInput;
   @Field(() => [CreateNoteInput], {
     nullable: true,
   })
@@ -95,4 +99,32 @@ export class CreateUserAccountInput implements User_Account {
     nullable: true,
   })
   updated_at: Date;
+}
+
+@InputType()
+export class LoginUserAccountInput {
+  @Field(() => String, {
+    nullable: true,
+  })
+  user_account: string | null;
+  @Field(() => String, {
+    nullable: true,
+  })
+  password: string | null;
+}
+
+@InputType()
+export class ChangePasswordInput {
+  @Field(() => String, {
+    nullable: true,
+  })
+  old_password: string | null;
+  @Field(() => String, {
+    nullable: true,
+  })
+  password: string | null;
+  @Field(() => String, {
+    nullable: true,
+  })
+  confirm_password: string | null;
 }

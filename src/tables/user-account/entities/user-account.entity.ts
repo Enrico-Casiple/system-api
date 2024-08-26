@@ -42,7 +42,7 @@ export class UserAccount implements User_Account {
   @Field(() => Session, {
     nullable: true,
   })
-  session: Session;
+  sessions: Session;
   @Field(() => [Note], {
     nullable: true,
   })

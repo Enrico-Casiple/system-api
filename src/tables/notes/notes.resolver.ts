@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { NotesService } from './notes.service';
 import { Note } from './entities/note.entity';
 import { CreateNoteInput } from './dto/create-note.input';
@@ -19,7 +19,7 @@ export class NotesResolver {
   }
 
   @Query(() => Note, { name: 'note' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => String }) id: string) {
     return this.notesService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class NotesResolver {
   }
 
   @Mutation(() => Note)
-  removeNote(@Args('id', { type: () => Int }) id: number) {
+  removeNote(@Args('id', { type: () => String }) id: string) {
     return this.notesService.remove(id);
   }
 }

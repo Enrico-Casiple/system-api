@@ -34,11 +34,13 @@ export class DepartmentService {
           company_id: createDepartmentInput.company_id,
           manager_id: createDepartmentInput.manager_id,
           department_users: {
-            create: createDepartmentInput.department_users.map((user) => {
-              return {
-                user_id: user.user_id,
-              };
-            }),
+            createMany: {
+              data: createDepartmentInput.department_users.map((user) => {
+                return {
+                  user_id: user.user_id,
+                };
+              }),
+            },
           },
         },
         include: {

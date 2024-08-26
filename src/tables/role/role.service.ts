@@ -4,7 +4,7 @@ import { UpdateRoleInput } from './dto/update-role.input';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { UserAccountService } from '../user-account/user-account.service';
-import { MODULE } from '@prisma/client';
+import { MODULE, VIEW_SCOPE } from '@prisma/client';
 
 @Injectable()
 export class RoleService {
@@ -13,7 +13,8 @@ export class RoleService {
     private readonly logger: LoggersService,
     private readonly userAccountService: UserAccountService,
   ) {}
-  async create(createRoleInput: CreateRoleInput) {
+  async create(createRoleInput: CreateRoleInput, currentUserId: string) {
+    await this.checkAddPermission(currentUserId, 'ROLE_MANAGEMENT');
     try {
       const role = await this.prismaService.role.create({
         data: {
@@ -22,12 +23,13 @@ export class RoleService {
             createMany: {
               data: createRoleInput.permissions.map((permission) => {
                 return {
-                  module: permission.module,
-                  view: permission.view,
-                  add: permission.add,
-                  edit: permission.edit,
-                  delete: permission.delete,
-                  scope: permission.scope,
+                  module: permission.module || MODULE.USER_MANAGEMENT,
+                  view: permission.view || false,
+                  add: permission.add || false,
+                  edit: permission.edit || false,
+                  delete: permission.delete || false,
+                  verify: permission.verify || false,
+                  scope: permission.scope || VIEW_SCOPE.OWN,
                 };
               }),
             },
@@ -99,7 +101,12 @@ export class RoleService {
     }
   }
 
-  async update(id: string, updateRoleInput: UpdateRoleInput) {
+  async update(
+    id: string,
+    updateRoleInput: UpdateRoleInput,
+    currentUserId: string,
+  ) {
+    await this.checkEditPermission(currentUserId, 'ROLE_MANAGEMENT');
     try {
       const existingRole = await this.findOne(id);
       const existingUserAccountIds = existingRole.user_account.map(
@@ -120,6 +127,7 @@ export class RoleService {
                   add: permission.add,
                   edit: permission.edit,
                   delete: permission.delete,
+                  verify: permission.verify,
                   scope: permission.scope,
                 };
               }),
@@ -146,7 +154,8 @@ export class RoleService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, currentUserId: string) {
+    await this.checkDeletePermission(currentUserId, 'ROLE_MANAGEMENT');
     try {
       const searchRole = await this.findOne(id);
       if (!searchRole) {

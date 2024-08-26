@@ -7,12 +7,15 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
+import { POSITION } from '@prisma/client';
+import { UtilityService } from 'src/common/utility/utility.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly logger: LoggersService,
+    private readonly utilityService: UtilityService,
   ) {}
   async create(createUserInput: CreateUserInput) {
     try {
@@ -29,36 +32,82 @@ export class UserService {
           middle_name: createUserInput.middle_name,
           last_name: createUserInput.last_name,
           email: createUserInput.email,
-          position: createUserInput.position,
-          companies: {
-            connect:
-              createUserInput.company_id?.map((id) => {
-                return { id: id };
-              }) || [],
-          },
-          departments: {
-            connect:
-              createUserInput.department_id?.map((id) => {
-                return { id: id };
-              }) || [],
-          },
+          position: createUserInput.position || POSITION.EMPLOYEE,
+          companies:
+            createUserInput.companies?.length > 0
+              ? {
+                  createMany: {
+                    data: createUserInput.companies?.map((company) => {
+                      return {
+                        company_id: company.company_id,
+                      };
+                    }),
+                  },
+                }
+              : undefined,
+          departments:
+            createUserInput.departments?.length > 0
+              ? {
+                  createMany: {
+                    data: createUserInput.departments?.map((department) => {
+                      return {
+                        department_id: department.department_id,
+                      };
+                    }),
+                  },
+                }
+              : undefined,
           user_account: {
             create: {
               email: createUserInput.email,
-              username: createUserInput.email.split('@')[0],
-              password: createUserInput.user_account.password,
+              username:
+                createUserInput.user_account.username ||
+                createUserInput.email.split('@')[0],
+              password: await this.utilityService.hashPassword(
+                createUserInput.user_account.password,
+              ),
             },
           },
         },
         include: {
           user_account: true,
-          companies: true,
-          departments: true,
-          company_president: true,
-          department_manager: true,
+          companies: {
+            include: {
+              company: {
+                include: {
+                  president: true,
+                },
+              },
+            },
+          },
+          departments: {
+            include: {
+              department: {
+                include: {
+                  company: true,
+                  manager: true,
+                  supervisor: true,
+                  department_users: true,
+                },
+              },
+            },
+          },
+          company_president: {
+            include: {
+              president: true,
+            },
+          },
+          department_manager: {
+            include: {
+              manager: true,
+              department_users: true,
+            },
+          },
         },
       });
+
       delete create_user.user_account.password;
+
       return create_user;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'UserService.create()');
@@ -155,12 +204,18 @@ export class UserService {
         this.logger.error('User not found', 'UserService.update()');
         throw new NotAcceptableException('User not found');
       }
-      const exsisting_company = await user.companies.find(
-        (company) => company.id,
-      );
-      const exsisting_department = await user.departments.find(
-        (department) => department.department_id,
-      );
+
+      const existingCompanyInUser = user.companies.map((company) => {
+        return {
+          id: company.id,
+        };
+      });
+
+      const existingDepartmentInUser = user.departments.map((department) => {
+        return {
+          id: department.id,
+        };
+      });
 
       const update_user = await this.prismaService.user.update({
         where: {
@@ -173,25 +228,35 @@ export class UserService {
           email: updateUserInput.email,
           position: updateUserInput.position,
           companies: {
-            disconnect: exsisting_company,
-            connect: updateUserInput.company_id
-              ? updateUserInput.company_id.map((id) => {
-                  return { id: id };
-                })
-              : [],
+            disconnect: existingCompanyInUser.map((company) => {
+              return {
+                id: company.id,
+              };
+            }),
+            connect: updateUserInput.companies?.map((company) => {
+              return {
+                id: company.company_id,
+              };
+            }),
           },
           departments: {
-            disconnect: exsisting_department,
-            connect: updateUserInput.department_id
-              ? updateUserInput.department_id.map((id) => {
-                  return { id: id };
-                })
-              : [],
+            disconnect: existingDepartmentInUser.map((department) => {
+              return {
+                id: department.id,
+              };
+            }),
+            connect: updateUserInput.departments?.map((department) => {
+              return {
+                id: department.department_id,
+              };
+            }),
           },
           user_account: {
             update: {
               email: updateUserInput.email,
-              username: updateUserInput.email.split('@')[0],
+              username:
+                updateUserInput.user_account.username ||
+                updateUserInput.email.split('@')[0],
             },
           },
         },

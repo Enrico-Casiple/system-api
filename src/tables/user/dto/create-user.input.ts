@@ -4,7 +4,10 @@ import {
   CreateCompanyInput,
   CreateCompanyUserInput,
 } from 'src/tables/company/dto/create-company.input';
-import { CreateDepartmentInput } from 'src/tables/department/dto/create-department.input';
+import {
+  CreateDepartmentInput,
+  CreateDepartmentUserInput,
+} from 'src/tables/department/dto/create-department.input';
 import { CreateUserAccountInput } from 'src/tables/user-account/dto/create-user-account.input';
 
 @InputType()
@@ -32,23 +35,27 @@ export class CreateUserInput implements User {
   @Field(() => String, {
     nullable: true,
   })
-  position: POSITION | null;
-  @Field(() => [String], {
+  phone_number: string;
+  @Field(() => String, {
     nullable: true,
   })
-  company_id: string[] | null;
+  position: POSITION | null;
+  @Field(() => Date, {
+    nullable: true,
+  })
+  emailVerified: Date;
+  @Field(() => String, {
+    nullable: true,
+  })
+  image: string;
   @Field(() => [CreateCompanyUserInput], {
     nullable: true,
   })
   companies: CreateCompanyUserInput[];
-  @Field(() => [String], {
+  @Field(() => [CreateDepartmentUserInput], {
     nullable: true,
   })
-  department_id: string[] | null;
-  @Field(() => [CreateCompanyUserInput], {
-    nullable: true,
-  })
-  departments: CreateCompanyUserInput[];
+  departments: CreateDepartmentUserInput[];
   @Field(() => [CreateCompanyInput], {
     nullable: true,
   })
@@ -61,6 +68,10 @@ export class CreateUserInput implements User {
     nullable: true,
   })
   department_manager: CreateDepartmentInput[];
+  @Field(() => [CreateDepartmentInput], {
+    nullable: true,
+  })
+  department_supervisor: CreateDepartmentInput[];
   @Field(() => Date, {
     nullable: true,
   })

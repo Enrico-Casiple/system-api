@@ -11,8 +11,14 @@ export class RoleResolver {
   constructor(private readonly roleService: RoleService) {}
 
   @Mutation(() => Role)
-  async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput) {
-    const create_role = await this.roleService.create(createRoleInput);
+  async createRole(
+    @Args('currentUserId') currentUserId: string,
+    @Args('createRoleInput') createRoleInput: CreateRoleInput,
+  ) {
+    const create_role = await this.roleService.create(
+      createRoleInput,
+      currentUserId,
+    );
     pubSub.publish('roleCreated', { roleCreated: create_role });
     return create_role;
   }
@@ -28,18 +34,25 @@ export class RoleResolver {
   }
 
   @Mutation(() => Role)
-  async updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput) {
+  async updateRole(
+    @Args('currentUserId') currentUserId: string,
+    @Args('updateRoleInput') updateRoleInput: UpdateRoleInput,
+  ) {
     const update_user = await this.roleService.update(
       updateRoleInput.id,
       updateRoleInput,
+      currentUserId,
     );
     pubSub.publish('roleCreated', { roleCreated: update_user });
     return update_user;
   }
 
   @Mutation(() => Role)
-  async removeRole(@Args('id', { type: () => String }) id: string) {
-    const delete_user = await this.roleService.remove(id);
+  async removeRole(
+    @Args('currentUserId') currentUserId: string,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    const delete_user = await this.roleService.remove(id, currentUserId);
     pubSub.publish('roleCreated', { roleCreated: delete_user });
     return delete_user;
   }

@@ -6,14 +6,14 @@ import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const config = app.get<ConfigService>(ConfigService);
+  const configService = app.get<ConfigService>(ConfigService);
+  const PORT = configService.get<number>('PORT') || 5173;
 
   app.useGlobalFilters(new ErrorHandlerFilter());
   app.enableCors({ origin: '*', credentials: true });
 
-  await app.listen(config.get('PORT') || 5173, async () => {
+  await app.listen(PORT, async () => {
     Logger.log(`Server is running on: ${await app.getUrl()}`);
-    // Link of the graphql playground
     Logger.log(`GraphQL Playground: ${await app.getUrl()}/graphql`);
   });
 }

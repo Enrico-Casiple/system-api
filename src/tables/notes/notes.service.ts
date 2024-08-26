@@ -5,6 +5,7 @@ import { UpdateNoteInput } from './dto/update-note.input';
 @Injectable()
 export class NotesService {
   create(createNoteInput: CreateNoteInput) {
+    console.log(createNoteInput);
     return 'This action adds a new note';
   }
 
@@ -12,15 +13,16 @@ export class NotesService {
     return `This action returns all notes`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} note`;
   }
 
-  update(id: number, updateNoteInput: UpdateNoteInput) {
+  update(id: string, updateNoteInput: UpdateNoteInput) {
+    console.log(updateNoteInput);
     return `This action updates a #${id} note`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} note`;
   }
 }

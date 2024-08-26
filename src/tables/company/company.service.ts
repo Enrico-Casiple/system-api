@@ -31,11 +31,13 @@ export class CompanyService {
           location: createCompanyInput.location,
           president_id: createCompanyInput.president_id,
           company_users: {
-            create: createCompanyInput.company_users.map((user) => {
-              return {
-                user_id: user.user_id,
-              };
-            }),
+            createMany: {
+              data: createCompanyInput.company_users.map((user) => {
+                return {
+                  user_id: user.user_id,
+                };
+              }),
+            },
           },
         },
         include: {
@@ -43,6 +45,7 @@ export class CompanyService {
           company_users: {
             include: {
               user: true,
+              company: true,
             },
           },
           departments: true,

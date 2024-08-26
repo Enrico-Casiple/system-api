@@ -73,6 +73,10 @@ export class Permission implements PrismaPermission {
   @Field(() => Boolean, {
     nullable: true,
   })
+  verify: boolean;
+  @Field(() => Boolean, {
+    nullable: true,
+  })
   role_id: string;
   @Field(() => Role, {
     nullable: true,

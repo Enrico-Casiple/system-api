@@ -9,8 +9,9 @@ type Department {
   company_id: String
   manager: User
   manager_id: String
+  supervisor: User
+  supervisor_id: String
   department_users: [DepartmentUser!]
-  department_users_id: [String!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -54,6 +55,17 @@ type CompanyUser {
   updated_at: DateTime
 }
 
+type Note {
+  id: String
+  name: String
+  description: String
+  logs: String
+  user_account_id: String
+  user_account: UserAccount
+  created_at: DateTime
+  updated_at: DateTime
+}
+
 type Role {
   id: String
   name: String
@@ -71,6 +83,7 @@ type Permission {
   add: Boolean
   edit: Boolean
   delete: Boolean
+  verify: Boolean
   role_id: Boolean
   role: Role
   scope: String
@@ -100,7 +113,18 @@ type UserAccount {
   user_id: String
   role: [Role!]
   role_id: [String!]
-  session: Session
+  sessions: Session
+  notes: [Note!]
+  type: String
+  provider: String
+  providerAccountId: String
+  refresh_token: String
+  access_token: String
+  expires_at: Int
+  token_type: String
+  scope: String
+  id_token: String
+  session_state: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -112,13 +136,15 @@ type User {
   last_name: String
   email: String
   position: String
-  company_id: [String!]
+  phone_number: String
+  emailVerified: DateTime
+  image: String
   companies: [CompanyUser!]
-  department_id: [String!]
-  department: [DepartmentUser!]
+  departments: [DepartmentUser!]
   company_president: [Company!]
   user_account: UserAccount
   department_manager: [Department!]
+  department_supervisor: [Department!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -133,8 +159,11 @@ type Query {
   roles: [Role!]!
   role(id: String!): Role!
   session(id: String!): Session!
-  userAccounts: [UserAccount!]!
   userAccount(id: String!): UserAccount!
+  verifyEmail(token: String!): UserAccount!
+  resetPassword(email: String!): String!
+  notes: [Note!]!
+  note(id: String!): Note!
 }
 
 type Mutation {
@@ -147,15 +176,20 @@ type Mutation {
   createDepartment(currentUserId: String!, createDepartmentInput: CreateDepartmentInput!): Department!
   updateDepartment(currentUserId: String!, updateDepartmentInput: UpdateDepartmentInput!): Department!
   removeDepartment(currentUserId: String!, id: String!): Department!
-  createRole(createRoleInput: CreateRoleInput!): Role!
-  updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  removeRole(id: String!): Role!
+  createRole(currentUserId: String!, createRoleInput: CreateRoleInput!): Role!
+  updateRole(currentUserId: String!, updateRoleInput: UpdateRoleInput!): Role!
+  removeRole(currentUserId: String!, id: String!): Role!
   createSession(createSessionInput: CreateSessionInput!): Session!
   updateSession(updateSessionInput: UpdateSessionInput!): Session!
   removeSession(id: String!): Session!
-  createUserAccount(createUserAccountInput: CreateUserAccountInput!): UserAccount!
-  updateUserAccount(updateUserAccountInput: UpdateUserAccountInput!): UserAccount!
-  removeUserAccount(id: String!): UserAccount!
+  login(loginUserAccountInput: LoginUserAccountInput!): Session!
+  refreshToken: Session!
+  logout: Session!
+  updateUserAccoutPassword(changePasswordInput: ChangePasswordInput!, currentUserid: String!): UserAccount!
+  changePassword(changePasswordInput: ChangePasswordInput!, currentUserid: String!): UserAccount!
+  createNote(createNoteInput: CreateNoteInput!): Note!
+  updateNote(updateNoteInput: UpdateNoteInput!): Note!
+  removeNote(id: String!): Note!
 }
 
 input CreateUserInput {
@@ -164,14 +198,16 @@ input CreateUserInput {
   middle_name: String
   last_name: String
   email: String
+  phone_number: String
   position: String
-  company_id: [String!]
+  emailVerified: DateTime
+  image: String
   companies: [CreateCompanyUserInput!]
-  department_id: [String!]
-  departments: [CreateCompanyUserInput!]
+  departments: [CreateDepartmentUserInput!]
   company_president: [CreateCompanyInput!]
   user_account: CreateUserAccountInput
   department_manager: [CreateDepartmentInput!]
+  department_supervisor: [CreateDepartmentInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -207,7 +243,8 @@ input CreateDepartmentInput {
   company_id: String
   manager: CreateUserInput
   manager_id: String
-  department_users_id: String
+  supervisor: CreateUserInput
+  supervisor_id: String
   department_users: [CreateDepartmentUserInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -228,11 +265,23 @@ input CreateUserAccountInput {
   email: String
   username: String
   password: String
+  confirm_password: String
   user_id: String
   user: CreateUserInput
   role: CreateRoleInput
   role_id: [String!]
-  session: CreateSessionInput
+  sessions: CreateSessionInput
+  notes: [CreateNoteInput!]
+  type: String
+  provider: String
+  providerAccountId: String
+  refresh_token: String
+  access_token: String
+  expires_at: Int
+  token_type: String
+  scope: String
+  id_token: String
+  session_state: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -254,7 +303,8 @@ input CreatePermissionInput {
   add: Boolean
   edit: Boolean
   delete: Boolean
-  role_id: Boolean
+  verify: Boolean
+  role_id: String
   role: CreateRoleInput
   scope: String
   created_at: DateTime
@@ -274,6 +324,17 @@ input CreateSessionInput {
   updated_at: DateTime
 }
 
+input CreateNoteInput {
+  id: String
+  name: String
+  description: String
+  logs: String
+  user_account_id: String
+  user_account: CreateUserAccountInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
 input UpdateUserInput {
   """The id of the user"""
   id: String!
@@ -281,14 +342,16 @@ input UpdateUserInput {
   middle_name: String
   last_name: String
   email: String
+  phone_number: String
   position: String
-  company_id: [String!]
+  emailVerified: DateTime
+  image: String
   companies: [CreateCompanyUserInput!]
-  department_id: [String!]
-  departments: [CreateCompanyUserInput!]
+  departments: [CreateDepartmentUserInput!]
   company_president: [CreateCompanyInput!]
   user_account: CreateUserAccountInput
   department_manager: [CreateDepartmentInput!]
+  department_supervisor: [CreateDepartmentInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -314,7 +377,8 @@ input UpdateDepartmentInput {
   company_id: String
   manager: CreateUserInput
   manager_id: String
-  department_users_id: String
+  supervisor: CreateUserInput
+  supervisor_id: String
   department_users: [CreateDepartmentUserInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -343,16 +407,24 @@ input UpdateSessionInput {
   updated_at: DateTime
 }
 
-input UpdateUserAccountInput {
-  id: String
-  email: String
-  username: String
+input LoginUserAccountInput {
+  user_account: String
   password: String
-  user_id: String
-  user: CreateUserInput
-  role: CreateRoleInput
-  role_id: [String!]
-  session: CreateSessionInput
+}
+
+input ChangePasswordInput {
+  old_password: String
+  password: String
+  confirm_password: String
+}
+
+input UpdateNoteInput {
+  id: String
+  name: String
+  description: String
+  logs: String
+  user_account_id: String
+  user_account: CreateUserAccountInput
   created_at: DateTime
   updated_at: DateTime
 }

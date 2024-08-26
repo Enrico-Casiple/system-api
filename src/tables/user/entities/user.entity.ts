@@ -36,22 +36,26 @@ export class User implements UserPrisma {
     nullable: true,
   })
   position: POSITION | null;
-  @Field(() => [String], {
+  @Field(() => String, {
     nullable: true,
   })
-  company_id: string[] | null;
+  phone_number: string;
+  @Field(() => Date, {
+    nullable: true,
+  })
+  emailVerified: Date;
+  @Field(() => String, {
+    nullable: true,
+  })
+  image: string;
   @Field(() => [CompanyUser], {
     nullable: true,
   })
   companies: CompanyUser[];
-  @Field(() => [String], {
-    nullable: true,
-  })
-  department_id: string[] | null;
   @Field(() => [DepartmentUser], {
     nullable: true,
   })
-  department: DepartmentUser[];
+  departments: DepartmentUser[];
   @Field(() => [Company], {
     nullable: true,
   })
@@ -64,6 +68,10 @@ export class User implements UserPrisma {
     nullable: true,
   })
   department_manager: Department[];
+  @Field(() => [Department], {
+    nullable: true,
+  })
+  department_supervisor: Department[];
   @Field(() => Date, {
     nullable: true,
   })

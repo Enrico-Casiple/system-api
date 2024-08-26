@@ -15,6 +15,10 @@ import { RoleModule } from './tables/role/role.module';
 import { SessionModule } from './tables/session/session.module';
 import { UserAccountModule } from './tables/user-account/user-account.module';
 import { NotesModule } from './tables/notes/notes.module';
+import { UtilityModule } from './common/utility/utility.module';
+import { SendEmailModule } from './common/send-email/send-email.module';
+import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter';
+import { AccessTokenGuard } from './common/auth/guard/access-token/access-token.guard';
 
 @Module({
   imports: [
@@ -58,8 +62,20 @@ import { NotesModule } from './tables/notes/notes.module';
     SessionModule,
     UserAccountModule,
     NotesModule,
+    UtilityModule,
+    SendEmailModule,
   ],
-  controllers: [],
-  providers: [PrismaService, LoggersService],
+  providers: [
+    PrismaService,
+    LoggersService,
+    {
+      provide: 'APP_FILTER',
+      useClass: ErrorHandlerFilter,
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: AccessTokenGuard,
+    },
+  ],
 })
 export class AppModule {}
