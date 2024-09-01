@@ -118,12 +118,12 @@ model Department {
 
 model User_Account {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  email    String? @unique
-  username String? @unique
+  email    String @unique
+  username String @unique
   password String?
 
   user    User?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id String?  @unique @db.ObjectId
+  user_id String  @unique @db.ObjectId
   role    Role[]   @relation(fields: [role_id], references: [id])
   role_id String[] @db.ObjectId
 

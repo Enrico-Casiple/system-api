@@ -5,6 +5,7 @@ import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { PubSub } from 'graphql-subscriptions';
 import { Public } from 'src/common/decorator/public/public.decorator';
+import { CurrentUserId } from 'src/common/decorator/current-user-id/current-user-id.decorator';
 const pubSub = new PubSub();
 
 @Resolver(() => Role)
@@ -13,7 +14,7 @@ export class RoleResolver {
 
   @Mutation(() => Role)
   async createRole(
-    @Args('currentUserId') currentUserId: string,
+    @CurrentUserId('currentUserId') currentUserId: string,
     @Args('createRoleInput') createRoleInput: CreateRoleInput,
   ) {
     const create_role = await this.roleService.create(

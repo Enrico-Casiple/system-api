@@ -42,7 +42,7 @@ export class RoleService {
         },
         include: {
           permissions: true,
-          user_account: true,
+          // user_account: true,
         },
       });
       return role;
