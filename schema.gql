@@ -331,6 +331,7 @@ input CreateNoteInput {
   logs: String
   user_account_id: String
   user_account: CreateUserAccountInput
+  requestion_forms_id: DateTime
   created_at: DateTime
   updated_at: DateTime
 }
@@ -425,6 +426,7 @@ input UpdateNoteInput {
   logs: String
   user_account_id: String
   user_account: CreateUserAccountInput
+  requestion_forms_id: DateTime
   created_at: DateTime
   updated_at: DateTime
 }

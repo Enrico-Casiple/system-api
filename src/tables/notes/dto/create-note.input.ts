@@ -17,6 +17,8 @@ export class CreateNoteInput implements Notes {
   @Field(() => CreateUserAccountInput, { nullable: true })
   user_account: CreateUserAccountInput;
   @Field(() => Date, { nullable: true })
+  requestion_forms_id: string;
+  @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })
   updated_at: Date;

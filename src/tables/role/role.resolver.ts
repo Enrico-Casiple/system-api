@@ -4,6 +4,7 @@ import { Role } from './entities/role.entity';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { PubSub } from 'graphql-subscriptions';
+import { Public } from 'src/common/decorator/public/public.decorator';
 const pubSub = new PubSub();
 
 @Resolver(() => Role)
@@ -58,6 +59,7 @@ export class RoleResolver {
   }
 
   @Subscription(() => Role)
+  @Public()
   roleCreated() {
     return pubSub.asyncIterator('roleCreated');
   }

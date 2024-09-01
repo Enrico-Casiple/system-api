@@ -32,15 +32,15 @@ model User {
 
   user_account User_Account?
 
-
-  requests RequestionForm[] @relation("Requester")
-  requests_verifier RequestionForm[] @relation("Verifier")
-  first_user_approval ApprovalUser[] @relation("FirstApprover")
-  item_category_approval ItemCategory[] @relation("SecondayApproval")
-  last_user_approval ApprovalUser[] @relation("LastApprover")
+  requests               RequestionForm[] @relation("Requester")
+  requests_verifier      RequestionForm[] @relation("Verifier")
+  user_approval          ApprovalUser[]   @relation("Approver")
+  item_category_approval ItemCategory[]   @relation("SecondayApproval")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("users")
 }
 
 enum POSITION {
@@ -60,6 +60,8 @@ model Company_User {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("company_users")
 }
 
 model Department_User {
@@ -72,6 +74,8 @@ model Department_User {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("department_users")
 }
 
 model Company {
@@ -89,6 +93,8 @@ model Company {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("company")
 }
 
 model Department {
@@ -106,6 +112,8 @@ model Department {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("department")
 }
 
 model User_Account {
@@ -138,6 +146,7 @@ model User_Account {
   updated_at DateTime @updatedAt
 
   // @@unique([provider, providerAccountId])
+  @@map("user_account")
 }
 
 model Role {
@@ -148,6 +157,8 @@ model Role {
   user_account    User_Account[] @relation(fields: [user_account_id], references: [id])
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
+
+  @@map("role")
 }
 
 model Permission {
@@ -165,6 +176,8 @@ model Permission {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("permission")
 }
 
 enum MODULE {
@@ -173,6 +186,12 @@ enum MODULE {
   COMPANY_MANAGEMENT
   ROLE_MANAGEMENT
   NOTE_MANAGEMENT
+  REQUESTION_MANAGEMENT
+  REQUESTION_CATEGORY_MANAGEMENT
+  SUPPLIER_MANAGEMENT
+  ITEM_CATEGORY_MANAGEMENT
+  UNIT_OF_MEASUREMENT_MANAGEMENT
+  APPROVAL_MANAGEMENT
 }
 
 enum VIEW_SCOPE {
@@ -199,6 +218,8 @@ model Session {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("session")
 }
 
 model Notes {
@@ -210,147 +231,180 @@ model Notes {
   user_account_id String?       @unique @db.ObjectId
   user_account    User_Account? @relation(fields: [user_account_id], references: [id])
 
+  requestion_forms_id String?       @db.ObjectId
+  requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("notes")
 }
 
-
-// TODO: add model for Requestion Form
 model RequestionForm {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
   description String
 
   //Whoe is requesting
-  user_id String? @db.ObjectId
-  requester User? @relation("Requester", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_id          String?   @db.ObjectId
+  requester        User?     @relation("Requester", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   // what are the items
-  items Item[]
+  items            Item[]
   //Who is the approver
-  approval_id String? @db.ObjectId
-  approval Approval? @relation("ApproverList", fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approval_id      String?   @db.ObjectId
+  approval         Approval? @relation("ApproverList", fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   //whos is the verifier
-  user_verifier_id String? @db.ObjectId
-  verifier User? @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_verifier_id String?   @db.ObjectId
+  verifier         User?     @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   status REQUESTION_STATUS @default(PENDING)
 
-  requestForm_category_id String? @db.ObjectId
-  requestForm_category RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestForm_category_id String?                 @db.ObjectId
+  requestForm_category    RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  isVerified Boolean @default(false)
+  notes Notes[]
+  CheckOutRequestForm CheckOutRequestForm?
+
+  isVerified Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("requestion_forms")
 }
 
 enum REQUESTION_STATUS {
+  DRAFT
   PENDING
-  APPROVED
+  VERIFY
+  FIRST_APPROVAL
+  SECOND_APPROVAL
+  LAST_APPOVAL
   REJECTED
+  ONGOING
   COMPLETED
 }
 
-// TODO: add model for Requestion Form Category
 model RequestionFormCategory {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String?
-  short_name String?
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  name             String?
+  short_name       String?
   requestion_forms RequestionForm[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  @@map("requestion_form_category")
 }
-// TODO: add model for Item
+
 model Item {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
   description String
-  quantity Int
-  price Float
+  quantity    Int
+  price       Float
   total_price Float
 
+  unit_of_measurement_id String?            @db.ObjectId
+  unit_of_measurement    UnitOfMeasurement? @relation(fields: [unit_of_measurement_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item_category_id       String?            @db.ObjectId
+  item_category          ItemCategory?      @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  supplier_id            String?            @db.ObjectId
+  supplier               Supplier?          @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestion_forms_id    String?            @db.ObjectId
+  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  unit_of_measurement_id String? @db.ObjectId
-  unit_of_measurement UnitOfMeasurement? @relation(fields: [unit_of_measurement_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  item_category_id String? @db.ObjectId
-  item_category ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  supplier_id String? @db.ObjectId
-  supplier Supplier? @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  requestion_forms_id String? @db.ObjectId
-  requestion_forms RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item_status ITEM_STATUS @default(PENDING)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("item")
 }
-// TODO: add model for Supplier or Vendor
+
+enum ITEM_STATUS {
+  DONE
+  PENDING
+}
+
 model Supplier {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String?
-  address String?
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  address        String?
   contact_person String?
   contact_number String?
-  email String?
+  email          String?
 
   items Item[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("supplier")
 }
-//  TODO: add model for item category
+
 model ItemCategory {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String?
-  description String?
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  name             String?
+  description      String?
   //user approval fo this category
   user_approval_id String? @db.ObjectId
-  user_approval User? @relation("SecondayApproval", fields: [user_approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_approval    User?   @relation("SecondayApproval", fields: [user_approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   approvalUser ApprovalUser[]
-  items Item[]
+  items        Item[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("item_category")
 }
-//  TODO: add model for unit of measurement
+
 model UnitOfMeasurement {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String?
-  symbol String?
-  base_unit String?
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String?
+  symbol            String?
+  base_unit         String?
   conversion_factor Float?
-  items Item[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  resutl_unit       String?
+  items             Item[]
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@map("unit_of_measurement")
 }
-// TODO: add model for Approval
+
 model Approval {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
   description String?
-  user_approval_id String? @db.ObjectId
-  user_approval ApprovalUser[] 
+  user_approval_id String?        @db.ObjectId
+  user_approval    ApprovalUser[]
   requestion_forms RequestionForm[] @relation("ApproverList")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("approval")
 }
-// TODO: add model for Approval User
+
 model ApprovalUser {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  level            Int?          // Indicates the level of approval, e.g., 1 for first, 2 for second, etc.
+  approver_id      String?      @db.ObjectId
+  approver         User?        @relation("Approver",fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item_category_id String?      @db.ObjectId
+  item_category    ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approval_id      String       @db.ObjectId
+  approval         Approval     @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
 
-  // First Level Approval
-  first_approver_id String? @db.ObjectId
-  first_approver User? @relation("FirstApprover", fields: [first_approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@map("approval_user")
+}
 
-  // Second Level Approval is form category approval this optional
-  item_category_id String? @db.ObjectId
-  item_category ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  // Third or Last Level Approval is for the requestion form
-  last_approver_id String? @db.ObjectId
-  last_approver User? @relation("LastApprover", fields: [last_approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  approval_id String? @db.ObjectId
-  approval Approval? @relation(fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
+model CheckOutRequestForm {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  requestion_forms_id String?       @unique @db.ObjectId
+  requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  @@map("checkout_request_form")
 }

@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PubSub } from 'graphql-subscriptions';
+import { Public } from 'src/common/decorator/public/public.decorator';
 
 const pubSub = new PubSub();
 
@@ -12,6 +13,7 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Mutation(() => User)
+  @Public()
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
     const user = await this.userService.create(createUserInput);
     pubSub.publish('userCreated', { userCreated: user });
@@ -46,6 +48,7 @@ export class UserResolver {
   }
 
   @Subscription(() => User)
+  @Public()
   async userCreated() {
     return pubSub.asyncIterator('userCreated');
   }
