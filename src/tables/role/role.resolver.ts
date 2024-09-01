@@ -37,7 +37,7 @@ export class RoleResolver {
 
   @Mutation(() => Role)
   async updateRole(
-    @Args('currentUserId') currentUserId: string,
+    @CurrentUserId('currentUserId') currentUserId: string,
     @Args('updateRoleInput') updateRoleInput: UpdateRoleInput,
   ) {
     const update_user = await this.roleService.update(
@@ -51,7 +51,7 @@ export class RoleResolver {
 
   @Mutation(() => Role)
   async removeRole(
-    @Args('currentUserId') currentUserId: string,
+    @CurrentUserId('currentUserId') currentUserId: string,
     @Args('id', { type: () => String }) id: string,
   ) {
     const delete_user = await this.roleService.remove(id, currentUserId);
