@@ -150,8 +150,9 @@ type User {
 }
 
 type Query {
-  findAll: [User!]!
-  findOne(id: String!): User!
+  users: [User!]!
+  user(email: String!): User!
+  userId(userId: String!): User!
   companies(currentUserId: String!): [Company!]!
   company(id: String!): Company!
   departments(currentUserId: String!): [Department!]!
@@ -177,8 +178,8 @@ type Mutation {
   updateDepartment(currentUserId: String!, updateDepartmentInput: UpdateDepartmentInput!): Department!
   removeDepartment(currentUserId: String!, id: String!): Department!
   createRole(createRoleInput: CreateRoleInput!): Role!
-  updateRole(currentUserId: String!, updateRoleInput: UpdateRoleInput!): Role!
-  removeRole(currentUserId: String!, id: String!): Role!
+  updateRole(updateRoleInput: UpdateRoleInput!): Role!
+  removeRole(id: String!): Role!
   createSession(createSessionInput: CreateSessionInput!): Session!
   updateSession(updateSessionInput: UpdateSessionInput!): Session!
   removeSession(id: String!): Session!

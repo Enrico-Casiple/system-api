@@ -20,14 +20,19 @@ export class UserResolver {
     return user;
   }
 
-  @Query(() => [User])
+  @Query(() => [User], { name: 'users' })
   async findAll() {
     return this.userService.findAll();
   }
 
-  @Query(() => User)
-  async findOne(@Args('id', { type: () => String }) id: string) {
-    return this.userService.findOne(id);
+  @Query(() => User, { name: 'user' })
+  async findOne(@Args('email', { type: () => String }) email: string) {
+    return this.userService.findOne(email);
+  }
+
+  @Query(() => User, { name: 'userId' })
+  async findOneId(@Args('userId', { type: () => String }) userId: string) {
+    return this.userService.findOneId(userId);
   }
 
   @Mutation(() => User)

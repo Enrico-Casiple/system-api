@@ -88,10 +88,10 @@ import { Reflector } from '@nestjs/core';
       provide: 'APP_FILTER',
       useClass: ErrorHandlerFilter,
     },
-    {
-      provide: 'APP_GUARD',
-      useClass: AccessTokenGuard,
-    },
+    // {
+    //   provide: 'APP_GUARD',
+    //   useClass: AccessTokenGuard,
+    // },
   ],
 })
 export class AppModule {}

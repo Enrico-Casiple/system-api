@@ -32,6 +32,7 @@ export class UserService {
           middle_name: createUserInput.middle_name,
           last_name: createUserInput.last_name,
           email: createUserInput.email,
+          phone_number: createUserInput.phone_number,
           position: createUserInput.position || POSITION.EMPLOYEE,
           companies:
             createUserInput.companies?.length > 0
@@ -139,14 +140,55 @@ export class UserService {
     }
   }
 
-  async findOne(id: string) {
-    if (!id || id.length !== 23) {
+  async findOne(email: string) {
+    if (!email) {
       this.logger.error('Invalid id', 'UserService.findOne()');
-      throw new NotAcceptableException('Invalid id');
+      throw new NotAcceptableException('Invalid Email');
     }
 
     try {
-      const user = await this.prismaService.user.findUnique({
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          OR: [
+            {
+              email: email,
+            },
+            {
+              user_account: {
+                username: email,
+              },
+            },
+          ],
+        },
+        include: {
+          user_account: true,
+          companies: true,
+          departments: true,
+        },
+      });
+
+      if (!user) {
+        this.logger.error('User not found', 'UserService.findOne()');
+        throw new NotAcceptableException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      this.logger.error(error.message, error.stack, 'UserService.findOne()');
+      throw new InternalServerErrorException(
+        `Error occurred while fetching user: ${error.message}`,
+      );
+    }
+  }
+
+  async findOneId(id: string) {
+    if (!id) {
+      this.logger.error('Invalid id', 'UserService.findOne()');
+      throw new NotAcceptableException('Invalid Unique Indetifier');
+    }
+
+    try {
+      const user = await this.prismaService.user.findFirst({
         where: {
           id: id,
         },
@@ -154,8 +196,6 @@ export class UserService {
           user_account: true,
           companies: true,
           departments: true,
-          company_president: true,
-          department_manager: true,
         },
       });
 
@@ -199,7 +239,7 @@ export class UserService {
 
   async update(id: string, updateUserInput: UpdateUserInput) {
     try {
-      const user = await this.findOne(id);
+      const user = await this.findOneId(id);
       if (!user) {
         this.logger.error('User not found', 'UserService.update()');
         throw new NotAcceptableException('User not found');
@@ -226,6 +266,7 @@ export class UserService {
           middle_name: updateUserInput.middle_name,
           last_name: updateUserInput.last_name,
           email: updateUserInput.email,
+          phone_number: updateUserInput.phone_number,
           position: updateUserInput.position,
           companies: {
             disconnect: existingCompanyInUser.map((company) => {
@@ -276,7 +317,7 @@ export class UserService {
 
   async remove(id: string) {
     try {
-      const user = await this.findOne(id);
+      const user = await this.findOneId(id);
       if (!user) {
         this.logger.error('User not found', 'UserService.remove()');
         throw new NotAcceptableException('User not found');
