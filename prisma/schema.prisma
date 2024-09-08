@@ -199,7 +199,6 @@ enum VIEW_SCOPE {
   DEPARTMENT
   COMPANY
   OWN
-  // Purchasing Module
   NON_FOOD
   FOOD
   GSD

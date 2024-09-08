@@ -33,6 +33,7 @@ export class DepartmentService {
           name: createDepartmentInput.name,
           company_id: createDepartmentInput.company_id,
           manager_id: createDepartmentInput.manager_id,
+          supervisor_id: createDepartmentInput.supervisor_id,
           department_users: {
             createMany: {
               data: createDepartmentInput.department_users.map((user) => {
@@ -46,6 +47,7 @@ export class DepartmentService {
         include: {
           company: true,
           manager: true,
+          supervisor: true,
           department_users: {
             include: {
               user: true,
@@ -105,7 +107,12 @@ export class DepartmentService {
         include: {
           company: true,
           manager: true,
-          department_users: true,
+          supervisor: true,
+          department_users: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -137,7 +144,12 @@ export class DepartmentService {
         include: {
           company: true,
           manager: true,
-          department_users: true,
+          supervisor: true,
+          department_users: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -163,7 +175,12 @@ export class DepartmentService {
         include: {
           company: true,
           manager: true,
-          department_users: true,
+          supervisor: true,
+          department_users: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -208,23 +225,31 @@ export class DepartmentService {
         },
         data: {
           name: updateDepartmentInput.name,
-          company: {
-            disconnect: true,
-            connect: {
-              id: updateDepartmentInput.company_id,
+          company_id: updateDepartmentInput.company_id,
+          manager_id: updateDepartmentInput.manager_id,
+          supervisor_id: updateDepartmentInput.supervisor_id,
+          department_users: {
+            deleteMany: {
+              department_id: id,
             },
-          },
-          manager: {
-            disconnect: true,
-            connect: {
-              id: updateDepartmentInput.manager_id,
+            createMany: {
+              data: updateDepartmentInput.department_users.map((user) => {
+                return {
+                  user_id: user.user_id,
+                };
+              }),
             },
           },
         },
         include: {
           company: true,
           manager: true,
-          department_users: true,
+          supervisor: true,
+          department_users: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 

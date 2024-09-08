@@ -52,7 +52,23 @@ export class CompanyService {
         },
       });
 
-      return create_company;
+      const find_new_company = await this.prisma.company.findUnique({
+        where: {
+          id: create_company.id,
+        },
+        include: {
+          president: true,
+          company_users: {
+            include: {
+              user: true,
+              company: true,
+            },
+          },
+          departments: true,
+        },
+      });
+
+      return find_new_company;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'CompanyService.create()');
       throw new InternalServerErrorException(
@@ -125,6 +141,7 @@ export class CompanyService {
           company_users: true,
         },
       });
+
       return companies;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'CompanyService.findAll()');
@@ -140,11 +157,21 @@ export class CompanyService {
         where: {
           id: id,
         },
+        include: {
+          president: true,
+          departments: true,
+          company_users: {
+            include: {
+              user: true,
+            },
+          },
+        },
       });
       if (!company) {
         this.logger.error('Company not found', 'CompanyService.findOne()');
         throw new Error('Company not found');
       }
+
       return company;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'CompanyService.findOne()');
@@ -176,8 +203,30 @@ export class CompanyService {
           short_name: updateCompanyInput.short_name,
           location: updateCompanyInput.location,
           president_id: updateCompanyInput.president_id,
+          company_users: {
+            deleteMany: {
+              company_id: id,
+            },
+            createMany: {
+              data: updateCompanyInput.company_users.map((user) => {
+                return {
+                  user_id: user.user_id,
+                };
+              }),
+            },
+          },
+        },
+        include: {
+          president: true,
+          departments: true,
+          company_users: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
+
       return updateCompany;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'CompanyService.update()');

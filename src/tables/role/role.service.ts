@@ -13,8 +13,7 @@ export class RoleService {
     private readonly logger: LoggersService,
     private readonly userAccountService: UserAccountService,
   ) {}
-  async create(createRoleInput: CreateRoleInput, currentUserId: string) {
-    await this.checkAddPermission(currentUserId, 'ROLE_MANAGEMENT');
+  async create(createRoleInput: CreateRoleInput) {
     try {
       const role = await this.prismaService.role.create({
         data: {
@@ -35,14 +34,18 @@ export class RoleService {
             },
           },
           user_account: {
-            connect: createRoleInput.user_account_id.map((id) => {
+            connect: createRoleInput.user_account_id?.map((id) => {
               return { id: id };
             }),
           },
         },
         include: {
           permissions: true,
-          // user_account: true,
+          user_account: {
+            include: {
+              user: true, // Include users
+            },
+          },
         },
       });
       return role;

@@ -13,14 +13,8 @@ export class RoleResolver {
   constructor(private readonly roleService: RoleService) {}
 
   @Mutation(() => Role)
-  async createRole(
-    @CurrentUserId('currentUserId') currentUserId: string,
-    @Args('createRoleInput') createRoleInput: CreateRoleInput,
-  ) {
-    const create_role = await this.roleService.create(
-      createRoleInput,
-      currentUserId,
-    );
+  async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput) {
+    const create_role = await this.roleService.create(createRoleInput);
     pubSub.publish('roleCreated', { roleCreated: create_role });
     return create_role;
   }
