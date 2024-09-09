@@ -13,8 +13,7 @@ export class RoleService {
     private readonly logger: LoggersService,
     private readonly userAccountService: UserAccountService,
   ) {}
-  async create(createRoleInput: CreateRoleInput, currentUserId: string) {
-    await this.checkAddPermission(currentUserId, 'ROLE_MANAGEMENT');
+  async create(createRoleInput: CreateRoleInput) {
     try {
       const role = await this.prismaService.role.create({
         data: {
@@ -23,8 +22,8 @@ export class RoleService {
             createMany: {
               data: createRoleInput.permissions.map((permission) => {
                 return {
-                  module: permission.module || MODULE.USER_MANAGEMENT,
-                  view: permission.view || false,
+                  module: permission.module,
+                  view: permission.view || true,
                   add: permission.add || false,
                   edit: permission.edit || false,
                   delete: permission.delete || false,
@@ -42,7 +41,7 @@ export class RoleService {
         },
         include: {
           permissions: true,
-          // user_account: true,
+          user_account: true,
         },
       });
       return role;
@@ -72,7 +71,7 @@ export class RoleService {
   }
 
   async findOne(id: string) {
-    if (!id || id.length !== 23) {
+    if (!id) {
       this.logger.error('Invalid role id', 'RoleService.findOne()');
       throw new InternalServerErrorException('Invalid role id');
     }
@@ -101,17 +100,12 @@ export class RoleService {
     }
   }
 
-  async update(
-    id: string,
-    updateRoleInput: UpdateRoleInput,
-    currentUserId: string,
-  ) {
-    await this.checkEditPermission(currentUserId, 'ROLE_MANAGEMENT');
+  async update(id: string, updateRoleInput: UpdateRoleInput) {
+    const searchRole = await this.findOne(id);
+    const existingUserAccountIds = searchRole.user_account.map(
+      (userAccount) => userAccount.id,
+    );
     try {
-      const existingRole = await this.findOne(id);
-      const existingUserAccountIds = existingRole.user_account.map(
-        (userAccount) => ({ id: userAccount.id }),
-      );
       const role = await this.prismaService.role.update({
         where: {
           id: id,
@@ -119,22 +113,27 @@ export class RoleService {
         data: {
           name: updateRoleInput.name,
           permissions: {
-            createMany: {
-              data: updateRoleInput.permissions.map((permission) => {
-                return {
+            updateMany: updateRoleInput.permissions.map((permission) => {
+              return {
+                where: {
+                  role_id: id,
                   module: permission.module,
+                },
+                data: {
                   view: permission.view,
                   add: permission.add,
                   edit: permission.edit,
                   delete: permission.delete,
                   verify: permission.verify,
                   scope: permission.scope,
-                };
-              }),
-            },
+                },
+              };
+            }),
           },
           user_account: {
-            disconnect: existingUserAccountIds,
+            disconnect: existingUserAccountIds.map((oldId) => {
+              return { id: oldId };
+            }),
             connect: updateRoleInput.user_account_id.map((newId) => {
               return { id: newId };
             }),
@@ -154,8 +153,7 @@ export class RoleService {
     }
   }
 
-  async remove(id: string, currentUserId: string) {
-    await this.checkDeletePermission(currentUserId, 'ROLE_MANAGEMENT');
+  async remove(id: string) {
     try {
       const searchRole = await this.findOne(id);
       if (!searchRole) {

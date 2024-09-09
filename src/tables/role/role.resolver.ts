@@ -5,7 +5,6 @@ import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { PubSub } from 'graphql-subscriptions';
 import { Public } from 'src/common/decorator/public/public.decorator';
-import { CurrentUserId } from 'src/common/decorator/current-user-id/current-user-id.decorator';
 const pubSub = new PubSub();
 
 @Resolver(() => Role)
@@ -13,14 +12,8 @@ export class RoleResolver {
   constructor(private readonly roleService: RoleService) {}
 
   @Mutation(() => Role)
-  async createRole(
-    @CurrentUserId('currentUserId') currentUserId: string,
-    @Args('createRoleInput') createRoleInput: CreateRoleInput,
-  ) {
-    const create_role = await this.roleService.create(
-      createRoleInput,
-      currentUserId,
-    );
+  async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput) {
+    const create_role = await this.roleService.create(createRoleInput);
     pubSub.publish('roleCreated', { roleCreated: create_role });
     return create_role;
   }
@@ -36,25 +29,18 @@ export class RoleResolver {
   }
 
   @Mutation(() => Role)
-  async updateRole(
-    @CurrentUserId('currentUserId') currentUserId: string,
-    @Args('updateRoleInput') updateRoleInput: UpdateRoleInput,
-  ) {
+  async updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput) {
     const update_user = await this.roleService.update(
       updateRoleInput.id,
       updateRoleInput,
-      currentUserId,
     );
     pubSub.publish('roleCreated', { roleCreated: update_user });
     return update_user;
   }
 
   @Mutation(() => Role)
-  async removeRole(
-    @CurrentUserId('currentUserId') currentUserId: string,
-    @Args('id', { type: () => String }) id: string,
-  ) {
-    const delete_user = await this.roleService.remove(id, currentUserId);
+  async removeRole(@Args('id', { type: () => String }) id: string) {
+    const delete_user = await this.roleService.remove(id);
     pubSub.publish('roleCreated', { roleCreated: delete_user });
     return delete_user;
   }
