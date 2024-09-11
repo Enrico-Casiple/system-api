@@ -23,6 +23,15 @@ import { SendEmailModule } from './common/send-email/send-email.module';
 import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter';
 // import { AccessTokenGuard } from './common/auth/guard/access-token/access-token.guard';
 // import { Reflector } from '@nestjs/core';
+import { RequestionFormCategoryModule } from './tables/requestion-form-category/requestion-form-category.module';
+import { SupplierModule } from './tables/supplier/supplier.module';
+import { ItemCategoryModule } from './tables/item-category/item-category.module';
+import { UnitOfMeasurementModule } from './tables/unit-of-measurement/unit-of-measurement.module';
+import { ApprovalModule } from './tables/approval/approval.module';
+import { ApprovalUserModule } from './tables/approval-user/approval-user.module';
+import { CheckOutRequestFormModule } from './tables/check-out-request-form/check-out-request-form.module';
+import { RequestFormModule } from './tables/request-form/request-form.module';
+import { ItemModule } from './tables/item/item.module';
 
 @Module({
   imports: [
@@ -71,6 +80,15 @@ import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter'
     NotesModule,
     UtilityModule,
     SendEmailModule,
+    RequestionFormCategoryModule,
+    SupplierModule,
+    ItemCategoryModule,
+    UnitOfMeasurementModule,
+    ApprovalModule,
+    ApprovalUserModule,
+    CheckOutRequestFormModule,
+    RequestFormModule,
+    ItemModule,
   ],
   providers: [
     PrismaService,

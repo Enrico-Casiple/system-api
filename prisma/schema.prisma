@@ -33,7 +33,7 @@ model User {
   user_account User_Account?
 
   requests               RequestionForm[] @relation("Requester")
-  requests_verifier      RequestionForm[] @relation("Verifier")
+  requests_verifier      RequestionFormCategory[] @relation("Verifier")
   user_approval          ApprovalUser[]   @relation("Approver")
   item_category_approval ItemCategory[]   @relation("SecondayApproval")
 
@@ -253,9 +253,6 @@ model RequestionForm {
   //Who is the approver
   approval_id      String?   @db.ObjectId
   approval         Approval? @relation("ApproverList", fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  //whos is the verifier
-  user_verifier_id String?   @db.ObjectId
-  verifier         User?     @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   status REQUESTION_STATUS @default(PENDING)
 
@@ -286,9 +283,15 @@ enum REQUESTION_STATUS {
 
 model RequestionFormCategory {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  
   name             String?
   short_name       String?
+
   requestion_forms RequestionForm[]
+
+  user_verifier_id String? @db.ObjectId
+  user_verifier    User?   @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
 
