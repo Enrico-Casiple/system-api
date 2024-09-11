@@ -246,18 +246,6 @@ export class UserService {
         throw new NotAcceptableException('User not found');
       }
 
-      // const existingCompanyInUser = user.companies.map((company) => {
-      //   return {
-      //     id: company.id,
-      //   };
-      // });
-
-      // const existingDepartmentInUser = user.departments.map((department) => {
-      //   return {
-      //     id: department.id,
-      //   };
-      // });
-
       const update_user = await this.prismaService.user.update({
         where: {
           id: id,
@@ -272,9 +260,7 @@ export class UserService {
           companies:
             updateUserInput.companies.length > 0
               ? {
-                  // deleteMany all Existing Companies
                   deleteMany: {},
-                  // Re-create all Companies
                   createMany: {
                     data: updateUserInput.companies.map((company) => {
                       return {
@@ -287,9 +273,7 @@ export class UserService {
           departments:
             updateUserInput.departments.length > 0
               ? {
-                  // deleteMany all Existing Departments
                   deleteMany: {},
-                  // Re-create all Departments
                   createMany: {
                     data: updateUserInput.departments.map((department) => {
                       return {
