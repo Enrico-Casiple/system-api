@@ -10,7 +10,11 @@ async function bootstrap() {
   const PORT = configService.get<number>('PORT') || 5173;
 
   app.useGlobalFilters(new ErrorHandlerFilter());
-  app.enableCors({ origin: '*', credentials: true });
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+  });
 
   await app.listen(PORT, async () => {
     Logger.log(`Server is running on: ${await app.getUrl()}`);
