@@ -3,6 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 import { LogModule } from './common/log/log.module';
 import { PrismaService } from './common/prisma/prisma.service';
 import { LoggersService } from './common/log/log.service';
@@ -45,7 +49,15 @@ import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter'
         subscriptions: {
           'graphql-ws': true,
         },
-        playground: true,
+        playground: false,
+        plugins: [
+          process.env.NODE_ENV === 'production'
+            ? ApolloServerPluginLandingPageProductionDefault({
+                graphRef: 'my-graph-id@my-graph-variant',
+                footer: false,
+              })
+            : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+        ],
       }),
     }),
     PrismaModule,
