@@ -33,11 +33,6 @@ export class RoleService {
               }),
             },
           },
-          user_account: {
-            connect: createRoleInput.user_account_id.map((id) => {
-              return { id: id };
-            }),
-          },
         },
         include: {
           permissions: true,
@@ -101,10 +96,7 @@ export class RoleService {
   }
 
   async update(id: string, updateRoleInput: UpdateRoleInput) {
-    const searchRole = await this.findOne(id);
-    const existingUserAccountIds = searchRole.user_account.map(
-      (userAccount) => userAccount.id,
-    );
+    await this.findOne(id);
     try {
       const role = await this.prismaService.role.update({
         where: {
@@ -128,14 +120,6 @@ export class RoleService {
                   scope: permission.scope,
                 },
               };
-            }),
-          },
-          user_account: {
-            disconnect: existingUserAccountIds.map((oldId) => {
-              return { id: oldId };
-            }),
-            connect: updateRoleInput.user_account_id.map((newId) => {
-              return { id: newId };
             }),
           },
         },

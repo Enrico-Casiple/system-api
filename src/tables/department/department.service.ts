@@ -34,15 +34,20 @@ export class DepartmentService {
           company_id: createDepartmentInput.company_id,
           manager_id: createDepartmentInput.manager_id,
           supervisor_id: createDepartmentInput.supervisor_id,
-          department_users: {
-            createMany: {
-              data: createDepartmentInput.department_users.map((user) => {
-                return {
-                  user_id: user.user_id,
-                };
-              }),
-            },
-          },
+          department_users:
+            createDepartmentInput.department_users?.length > 0
+              ? {
+                  createMany: {
+                    data: createDepartmentInput.department_users?.map(
+                      (user) => {
+                        return {
+                          user_id: user.user_id,
+                        };
+                      },
+                    ),
+                  },
+                }
+              : undefined,
         },
         include: {
           company: true,
@@ -206,11 +211,6 @@ export class DepartmentService {
     );
     const existing_department = await this.findOne(id);
 
-    const deleteExistingDepartmentUsers =
-      existing_department.department_users.map(
-        (department_user) => department_user.id,
-      );
-
     try {
       const update_department = await this.prismaService.department.update({
         where: {
@@ -223,9 +223,7 @@ export class DepartmentService {
           supervisor_id: updateDepartmentInput.supervisor_id,
           department_users: {
             deleteMany: {
-              id: {
-                in: deleteExistingDepartmentUsers,
-              },
+              department_id: id,
             },
             createMany: {
               data: updateDepartmentInput.department_users.map((user) => {
