@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Approval as PrismaApproval } from '@prisma/client';
+import { ApprovalUser } from 'src/tables/approval-user/entities/approval-user.entity';
 import { RequestForm } from 'src/tables/request-form/entities/request-form.entity';
 
 @ObjectType()
@@ -12,7 +13,8 @@ export class Approval implements PrismaApproval {
   description: string | null;
   @Field(() => String, { nullable: true })
   user_approval_id: string | null;
-  // user_approval: User;
+  @Field(() => ApprovalUser, { nullable: true })
+  user_approval: ApprovalUser;
   @Field(() => [RequestForm], { nullable: true })
   requestion_forms: RequestForm[];
   @Field(() => Date, { nullable: true })

@@ -3,6 +3,10 @@ import { REQUESTION_STATUS } from '@prisma/client';
 import { Note } from 'src/tables/notes/entities/note.entity';
 import { User } from 'src/tables/user/entities/user.entity';
 import { RequestionForm as PrismaRequestionForm } from '@prisma/client';
+import { Item } from 'src/tables/item/entities/item.entity';
+import { Approval } from 'src/tables/approval/entities/approval.entity';
+import { RequestionFormCategory } from 'src/tables/requestion-form-category/entities/requestion-form-category.entity';
+import { CheckOutRequestForm } from 'src/tables/check-out-request-form/entities/check-out-request-form.entity';
 
 @ObjectType()
 export class RequestForm implements PrismaRequestionForm {
@@ -16,18 +20,22 @@ export class RequestForm implements PrismaRequestionForm {
   user_id: string | null;
   @Field(() => User, { nullable: true })
   requester: User;
-  // items: string;
+  @Field(() => [Item], { nullable: true })
+  items: Item[];
   @Field(() => String, { nullable: true })
   approval_id: string | null;
-  // approval: string;
+  @Field(() => Approval, { nullable: true })
+  approval: Approval;
   @Field(() => String, { nullable: true })
   status: REQUESTION_STATUS;
   @Field(() => String, { nullable: true })
   requestForm_category_id: string | null;
-  // requestForm_category: string;
+  @Field(() => RequestionFormCategory, { nullable: true })
+  requestForm_category: RequestionFormCategory;
   @Field(() => [Note], { nullable: true })
   notes: Note[];
-  // CheckOutRequestForm: string;
+  @Field(() => CheckOutRequestForm, { nullable: true })
+  CheckOutRequestForm: CheckOutRequestForm;
   @Field(() => Boolean, { nullable: true })
   isVerified: boolean;
   @Field(() => Date, { nullable: true })

@@ -1,9 +1,11 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { RequestFormService } from './request-form.service';
 import { RequestForm } from './entities/request-form.entity';
 import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
+import { PubSub } from 'graphql-subscriptions';
 
+const pubSub = new PubSub();
 @Resolver(() => RequestForm)
 export class RequestFormResolver {
   constructor(private readonly requestFormService: RequestFormService) {}
@@ -13,7 +15,9 @@ export class RequestFormResolver {
     @Args('createRequestFormInput')
     createRequestFormInput: CreateRequestFormInput,
   ) {
-    return this.requestFormService.create(createRequestFormInput);
+    const create = this.requestFormService.create(createRequestFormInput);
+    pubSub.publish('requestFormCreated', { requestFormCreated: create });
+    return create;
   }
 
   @Query(() => [RequestForm], { name: 'requestForms' })
@@ -31,14 +35,23 @@ export class RequestFormResolver {
     @Args('updateRequestFormInput')
     updateRequestFormInput: UpdateRequestFormInput,
   ) {
-    return this.requestFormService.update(
+    const update = this.requestFormService.update(
       updateRequestFormInput.id,
       updateRequestFormInput,
     );
+    pubSub.publish('requestFormCreated', { requestFormCreated: update });
+    return update;
   }
 
   @Mutation(() => RequestForm)
   removeRequestForm(@Args('id', { type: () => String }) id: string) {
-    return this.requestFormService.remove(id);
+    const remove = this.requestFormService.remove(id);
+    pubSub.publish('requestFormCreated', { requestFormCreated: remove });
+    return remove;
+  }
+
+  @Subscription(() => RequestForm)
+  requestFormCreated() {
+    return pubSub.asyncIterator('requestFormCreated');
   }
 }

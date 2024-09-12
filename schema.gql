@@ -149,16 +149,77 @@ type User {
   updated_at: DateTime
 }
 
+type Item {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  price: Float
+  total_price: Float
+  unit_of_measurement_id: String
+  item_category_id: String
+  supplier_id: String
+  requestion_forms_id: String
+  item_status: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type ItemCategory {
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: User
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type ApprovalUser {
+  id: String
+  level: Int
+  approver_id: String
+  item_category_id: String
+  item_category: ItemCategory
+  approval_id: String
+  approval: Approval
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Approval {
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: ApprovalUser
+  requestion_forms: [RequestForm!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type CheckOutRequestForm {
+  id: String
+  requestion_forms_id: String
+  requestion_forms: RequestForm
+  created_at: DateTime
+  updated_at: DateTime
+}
+
 type RequestForm {
   id: String
   name: String
   description: String
   user_id: String
   requester: User
+  items: [Item!]
   approval_id: String
+  approval: Approval
   status: String
   requestForm_category_id: String
+  requestForm_category: RequestionFormCategory
   notes: [Note!]
+  CheckOutRequestForm: CheckOutRequestForm
   isVerified: Boolean
   created_at: DateTime
   updated_at: DateTime
@@ -186,32 +247,6 @@ type Supplier {
   updated_at: DateTime
 }
 
-type ItemCategory {
-  id: String
-  name: String
-  description: String
-  user_approval_id: String
-  user_approval: User
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-type Item {
-  id: String
-  name: String
-  description: String
-  quantity: Float
-  price: Float
-  total_price: Float
-  unit_of_measurement_id: String
-  item_category_id: String
-  supplier_id: String
-  requestion_forms_id: String
-  item_status: String
-  created_at: DateTime
-  updated_at: DateTime
-}
-
 type UnitOfMeasurement {
   id: String
   name: String
@@ -220,36 +255,6 @@ type UnitOfMeasurement {
   conversion_factor: Int
   resutl_unit: String
   items: [Item!]
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-type Approval {
-  id: String
-  name: String
-  description: String
-  user_approval_id: String
-  requestion_forms: [RequestForm!]
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-type ApprovalUser {
-  id: String
-  level: Int
-  approver_id: String
-  item_category_id: String
-  item_category: ItemCategory
-  approval_id: String
-  approval: Approval
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-type CheckOutRequestForm {
-  id: String
-  requestion_forms_id: String
-  requestion_forms: RequestForm
   created_at: DateTime
   updated_at: DateTime
 }
@@ -595,11 +600,59 @@ input CreateRequestFormInput {
   description: String
   user_id: String
   requester: CreateUserInput
+  items: [CreateItemInput!]
   approval_id: String
+  approval: CreateApprovalInput
   status: String
   requestForm_category_id: String
+  requestForm_category: CreateRequestionFormCategoryInput
   notes: [CreateNoteInput!]
+  CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateItemInput {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  price: Float
+  total_price: Float
+  unit_of_measurement_id: String
+  item_category_id: String
+  supplier_id: String
+  requestion_forms_id: String
+  item_status: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateApprovalInput {
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: [CreateApprovalUserInput!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateApprovalUserInput {
+  id: String
+  level: Int
+  approver_id: String
+  item_category_id: String
+  approval_id: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateCheckOutRequestFormInput {
+  id: String
+  requestion_forms_id: String
+  requestion_forms: CreateRequestFormInput
   created_at: DateTime
   updated_at: DateTime
 }
@@ -679,30 +732,12 @@ input UpdateUnitOfMeasurementInput {
   updated_at: DateTime
 }
 
-input CreateApprovalInput {
-  id: String
-  name: String
-  description: String
-  user_approval_id: String
-  created_at: DateTime
-  updated_at: DateTime
-}
-
 input UpdateApprovalInput {
   id: String
   name: String
   description: String
   user_approval_id: String
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-input CreateApprovalUserInput {
-  id: String
-  level: Int
-  approver_id: String
-  item_category_id: String
-  approval_id: String
+  user_approval: [CreateApprovalUserInput!]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -713,14 +748,6 @@ input UpdateApprovalUserInput {
   approver_id: String
   item_category_id: String
   approval_id: String
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-input CreateCheckOutRequestFormInput {
-  id: String
-  requestion_forms_id: String
-  requestion_forms: CreateRequestFormInput
   created_at: DateTime
   updated_at: DateTime
 }
@@ -739,27 +766,15 @@ input UpdateRequestFormInput {
   description: String
   user_id: String
   requester: CreateUserInput
+  items: [CreateItemInput!]
   approval_id: String
+  approval: CreateApprovalInput
   status: String
   requestForm_category_id: String
+  requestForm_category: CreateRequestionFormCategoryInput
   notes: [CreateNoteInput!]
+  CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean
-  created_at: DateTime
-  updated_at: DateTime
-}
-
-input CreateItemInput {
-  id: String
-  name: String
-  description: String
-  quantity: Float
-  price: Float
-  total_price: Float
-  unit_of_measurement_id: String
-  item_category_id: String
-  supplier_id: String
-  requestion_forms_id: String
-  item_status: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -791,4 +806,5 @@ type Subscription {
   unitOfMeasurementCreated: UnitOfMeasurement!
   approvalUserCreated: ApprovalUser!
   checkOutRequestFormCreated: CheckOutRequestForm!
+  requestFormCreated: RequestForm!
 }

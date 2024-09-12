@@ -1,6 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { REQUESTION_STATUS, RequestionForm } from '@prisma/client';
+import { CreateApprovalInput } from 'src/tables/approval/dto/create-approval.input';
+import { CreateCheckOutRequestFormInput } from 'src/tables/check-out-request-form/dto/create-check-out-request-form.input';
+import { CreateItemInput } from 'src/tables/item/dto/create-item.input';
 import { CreateNoteInput } from 'src/tables/notes/dto/create-note.input';
+import { CreateRequestionFormCategoryInput } from 'src/tables/requestion-form-category/dto/create-requestion-form-category.input';
 import { CreateUserInput } from 'src/tables/user/dto/create-user.input';
 import { User } from 'src/tables/user/entities/user.entity';
 
@@ -16,18 +20,22 @@ export class CreateRequestFormInput implements RequestionForm {
   user_id: string | null;
   @Field(() => CreateUserInput, { nullable: true })
   requester: User;
-  // items: string;
+  @Field(() => [CreateItemInput], { nullable: true })
+  items: CreateItemInput[];
   @Field(() => String, { nullable: true })
   approval_id: string | null;
-  // approval: string;
+  @Field(() => CreateApprovalInput, { nullable: true })
+  approval: CreateApprovalInput;
   @Field(() => String, { nullable: true })
   status: REQUESTION_STATUS;
   @Field(() => String, { nullable: true })
   requestForm_category_id: string | null;
-  // requestForm_category: string;
+  @Field(() => CreateRequestionFormCategoryInput, { nullable: true })
+  requestForm_category: CreateRequestionFormCategoryInput;
   @Field(() => [CreateNoteInput], { nullable: true })
   notes: CreateNoteInput[];
-  // CheckOutRequestForm: string;
+  @Field(() => CreateCheckOutRequestFormInput, { nullable: true })
+  CheckOutRequestForm: CreateCheckOutRequestFormInput;
   @Field(() => Boolean, { nullable: true })
   isVerified: boolean;
   @Field(() => Date, { nullable: true })
