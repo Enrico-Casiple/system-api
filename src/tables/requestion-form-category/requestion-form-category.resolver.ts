@@ -1,9 +1,11 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { RequestionFormCategoryService } from './requestion-form-category.service';
 import { RequestionFormCategory } from './entities/requestion-form-category.entity';
 import { CreateRequestionFormCategoryInput } from './dto/create-requestion-form-category.input';
 import { UpdateRequestionFormCategoryInput } from './dto/update-requestion-form-category.input';
+import { PubSub } from 'graphql-subscriptions';
 
+const pubSub = new PubSub();
 @Resolver(() => RequestionFormCategory)
 export class RequestionFormCategoryResolver {
   constructor(
@@ -15,9 +17,13 @@ export class RequestionFormCategoryResolver {
     @Args('createRequestionFormCategoryInput')
     createRequestionFormCategoryInput: CreateRequestionFormCategoryInput,
   ) {
-    return this.requestionFormCategoryService.create(
+    const create = this.requestionFormCategoryService.create(
       createRequestionFormCategoryInput,
     );
+    pubSub.publish('requestionFormCategoryCreated', {
+      requestionFormCategoryCreated: create,
+    });
+    return create;
   }
 
   @Query(() => [RequestionFormCategory], { name: 'requestionFormCategory' })
@@ -35,14 +41,27 @@ export class RequestionFormCategoryResolver {
     @Args('updateRequestionFormCategoryInput')
     updateRequestionFormCategoryInput: UpdateRequestionFormCategoryInput,
   ) {
-    return this.requestionFormCategoryService.update(
+    const udpate = this.requestionFormCategoryService.update(
       updateRequestionFormCategoryInput.id,
       updateRequestionFormCategoryInput,
     );
+    pubSub.publish('requestionFormCategoryCreated', {
+      requestionFormCategoryCreated: udpate,
+    });
+    return udpate;
   }
 
   @Mutation(() => RequestionFormCategory)
   removeRequestionFormCategory(@Args('id', { type: () => String }) id: string) {
-    return this.requestionFormCategoryService.remove(id);
+    const remove = this.requestionFormCategoryService.remove(id);
+    pubSub.publish('requestionFormCategoryCreated', {
+      requestionFormCategoryCreated: remove,
+    });
+    return remove;
+  }
+
+  @Subscription(() => RequestionFormCategory)
+  requestionFormCategoryCreated() {
+    return pubSub.asyncIterator('requestionFormCategoryCreated');
   }
 }

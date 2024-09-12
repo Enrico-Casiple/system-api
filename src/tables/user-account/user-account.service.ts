@@ -18,8 +18,8 @@ export class UserAccountService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly logger: LoggersService,
-    private readonly utilityService: UtilityService,
     private readonly sessionService: SessionService,
+    private readonly utilityService: UtilityService,
     private readonly sendEmailService: SendEmailService,
     private readonly configService: ConfigService,
   ) {}
@@ -419,3 +419,4 @@ export class UserAccountService {
     }
   }
 }
+

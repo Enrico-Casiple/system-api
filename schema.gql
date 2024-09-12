@@ -187,28 +187,13 @@ type Supplier {
 }
 
 type ItemCategory {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-type UnitOfMeasurement {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-type Approval {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-type ApprovalUser {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-type CheckOutRequestForm {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: User
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 type Item {
@@ -223,6 +208,48 @@ type Item {
   supplier_id: String
   requestion_forms_id: String
   item_status: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type UnitOfMeasurement {
+  id: String
+  name: String
+  symbol: String
+  base_unit: String
+  conversion_factor: Int
+  resutl_unit: String
+  items: [Item!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Approval {
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  requestion_forms: [RequestForm!]
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type ApprovalUser {
+  id: String
+  level: Int
+  approver_id: String
+  item_category_id: String
+  item_category: ItemCategory
+  approval_id: String
+  approval: Approval
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type CheckOutRequestForm {
+  id: String
+  requestion_forms_id: String
+  requestion_forms: RequestForm
   created_at: DateTime
   updated_at: DateTime
 }
@@ -244,12 +271,16 @@ type Query {
   notes: [Note!]!
   note(id: String!): Note!
   requestionFormCategory(id: String!): RequestionFormCategory!
+  suppliers: [Supplier!]!
   supplier(id: String!): Supplier!
-  itemCategory(id: Int!): ItemCategory!
-  unitOfMeasurement(id: Int!): UnitOfMeasurement!
-  approval(id: Int!): Approval!
-  approvalUser(id: Int!): ApprovalUser!
-  checkOutRequestForm(id: Int!): CheckOutRequestForm!
+  itemCategory(id: String!): ItemCategory!
+  unitOfMeasurements: [UnitOfMeasurement!]!
+  unitOfMeasurement(id: String!): UnitOfMeasurement!
+  approvals: [Approval!]!
+  approval(id: String!): Approval!
+  approvalUser(id: String!): ApprovalUser!
+  checkOutRequestForms: [CheckOutRequestForm!]!
+  checkOutRequestForm(id: String!): CheckOutRequestForm!
   requestForms: [RequestForm!]!
   requestForm(id: String!): RequestForm!
   item(id: String!): Item!
@@ -287,19 +318,19 @@ type Mutation {
   removeSupplier(id: String!): Supplier!
   createItemCategory(createItemCategoryInput: CreateItemCategoryInput!): ItemCategory!
   updateItemCategory(updateItemCategoryInput: UpdateItemCategoryInput!): ItemCategory!
-  removeItemCategory(id: Int!): ItemCategory!
+  removeItemCategory(id: String!): ItemCategory!
   createUnitOfMeasurement(createUnitOfMeasurementInput: CreateUnitOfMeasurementInput!): UnitOfMeasurement!
   updateUnitOfMeasurement(updateUnitOfMeasurementInput: UpdateUnitOfMeasurementInput!): UnitOfMeasurement!
-  removeUnitOfMeasurement(id: Int!): UnitOfMeasurement!
+  removeUnitOfMeasurement(id: String!): UnitOfMeasurement!
   createApproval(createApprovalInput: CreateApprovalInput!): Approval!
   updateApproval(updateApprovalInput: UpdateApprovalInput!): Approval!
-  removeApproval(id: Int!): Approval!
+  removeApproval(id: String!): Approval!
   createApprovalUser(createApprovalUserInput: CreateApprovalUserInput!): ApprovalUser!
   updateApprovalUser(updateApprovalUserInput: UpdateApprovalUserInput!): ApprovalUser!
-  removeApprovalUser(id: Int!): ApprovalUser!
+  removeApprovalUser(id: String!): ApprovalUser!
   createCheckOutRequestForm(createCheckOutRequestFormInput: CreateCheckOutRequestFormInput!): CheckOutRequestForm!
   updateCheckOutRequestForm(updateCheckOutRequestFormInput: UpdateCheckOutRequestFormInput!): CheckOutRequestForm!
-  removeCheckOutRequestForm(id: Int!): CheckOutRequestForm!
+  removeCheckOutRequestForm(id: String!): CheckOutRequestForm!
   createRequestForm(createRequestFormInput: CreateRequestFormInput!): RequestForm!
   updateRequestForm(updateRequestFormInput: UpdateRequestFormInput!): RequestForm!
   removeRequestForm(id: String!): RequestForm!
@@ -607,58 +638,99 @@ input UpdateSupplierInput {
 }
 
 input CreateItemCategoryInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: CreateUserInput
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateItemCategoryInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  user_approval: CreateUserInput
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input CreateUnitOfMeasurementInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  name: String
+  symbol: String
+  base_unit: String
+  conversion_factor: Int
+  resutl_unit: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateUnitOfMeasurementInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String
+  name: String
+  symbol: String
+  base_unit: String
+  conversion_factor: Int
+  resutl_unit: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input CreateApprovalInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateApprovalInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String
+  name: String
+  description: String
+  user_approval_id: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input CreateApprovalUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  level: Int
+  approver_id: String
+  item_category_id: String
+  approval_id: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateApprovalUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String
+  level: Int
+  approver_id: String
+  item_category_id: String
+  approval_id: String
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input CreateCheckOutRequestFormInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String
+  requestion_forms_id: String
+  requestion_forms: CreateRequestFormInput
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateCheckOutRequestFormInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String
+  requestion_forms_id: String
+  requestion_forms: CreateRequestFormInput
+  created_at: DateTime
+  updated_at: DateTime
 }
 
 input UpdateRequestFormInput {
@@ -713,4 +785,10 @@ type Subscription {
   companyAdded: Company!
   departmentAdded: Department!
   roleCreated: Role!
+  requestionFormCategoryCreated: RequestionFormCategory!
+  supplierCreated: Supplier!
+  itemCategoryCreated: ItemCategory!
+  unitOfMeasurementCreated: UnitOfMeasurement!
+  approvalUserCreated: ApprovalUser!
+  checkOutRequestFormCreated: CheckOutRequestForm!
 }

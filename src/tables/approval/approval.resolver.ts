@@ -9,27 +9,34 @@ export class ApprovalResolver {
   constructor(private readonly approvalService: ApprovalService) {}
 
   @Mutation(() => Approval)
-  createApproval(@Args('createApprovalInput') createApprovalInput: CreateApprovalInput) {
+  createApproval(
+    @Args('createApprovalInput') createApprovalInput: CreateApprovalInput,
+  ) {
     return this.approvalService.create(createApprovalInput);
   }
 
-  @Query(() => [Approval], { name: 'approval' })
+  @Query(() => [Approval], { name: 'approvals' })
   findAll() {
     return this.approvalService.findAll();
   }
 
   @Query(() => Approval, { name: 'approval' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => String }) id: string) {
     return this.approvalService.findOne(id);
   }
 
   @Mutation(() => Approval)
-  updateApproval(@Args('updateApprovalInput') updateApprovalInput: UpdateApprovalInput) {
-    return this.approvalService.update(updateApprovalInput.id, updateApprovalInput);
+  updateApproval(
+    @Args('updateApprovalInput') updateApprovalInput: UpdateApprovalInput,
+  ) {
+    return this.approvalService.update(
+      updateApprovalInput.id,
+      updateApprovalInput,
+    );
   }
 
   @Mutation(() => Approval)
-  removeApproval(@Args('id', { type: () => Int }) id: number) {
+  removeApproval(@Args('id', { type: () => String }) id: string) {
     return this.approvalService.remove(id);
   }
 }

@@ -145,15 +145,7 @@ export class CompanyService {
         include: {
           president: true,
           departments: true,
-<<<<<<< HEAD
-          company_users: {
-            include: {
-              user: true,
-            },
-          },
-=======
           company_users: true,
->>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
       if (!company) {
@@ -213,11 +205,6 @@ export class CompanyService {
               user: true,
             },
           },
-        },
-        include: {
-          president: true,
-          departments: true,
-          company_users: true,
         },
       });
 

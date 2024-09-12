@@ -33,26 +33,10 @@ export class RoleService {
               }),
             },
           },
-<<<<<<< HEAD
-          user_account: {
-            connect: createRoleInput.user_account_id?.map((id) => {
-              return { id: id };
-            }),
-          },
-        },
-        include: {
-          permissions: true,
-          user_account: {
-            include: {
-              user: true, // Include users
-            },
-          },
-=======
         },
         include: {
           permissions: true,
           user_account: true,
->>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
       return role;

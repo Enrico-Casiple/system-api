@@ -12,15 +12,15 @@ export class ApprovalService {
     return `This action returns all approval`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} approval`;
   }
 
-  update(id: number, updateApprovalInput: UpdateApprovalInput) {
+  update(id: string, updateApprovalInput: UpdateApprovalInput) {
     return `This action updates a #${id} approval`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} approval`;
   }
 }

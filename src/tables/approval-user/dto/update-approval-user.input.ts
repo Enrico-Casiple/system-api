@@ -1,8 +1,10 @@
 import { CreateApprovalUserInput } from './create-approval-user.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field, PartialType } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateApprovalUserInput extends PartialType(CreateApprovalUserInput) {
-  @Field(() => Int)
-  id: number;
+export class UpdateApprovalUserInput extends PartialType(
+  CreateApprovalUserInput,
+) {
+  @Field(() => String, { nullable: true })
+  id: string;
 }
