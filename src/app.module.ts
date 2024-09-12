@@ -1,12 +1,15 @@
-import { ExecutionContext, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './common/prisma/prisma.module';
-import { GqlExecutionContext, GraphQLModule } from '@nestjs/graphql';
+import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 import { LogModule } from './common/log/log.module';
 import { PrismaService } from './common/prisma/prisma.service';
 import { LoggersService } from './common/log/log.service';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { UserModule } from './tables/user/user.module';
 import { GraphQLFormattedError } from 'graphql';
 import { CompanyModule } from './tables/company/company.module';
@@ -18,8 +21,17 @@ import { NotesModule } from './tables/notes/notes.module';
 import { UtilityModule } from './common/utility/utility.module';
 import { SendEmailModule } from './common/send-email/send-email.module';
 import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter';
-import { AccessTokenGuard } from './common/auth/guard/access-token/access-token.guard';
-import { Reflector } from '@nestjs/core';
+// import { AccessTokenGuard } from './common/auth/guard/access-token/access-token.guard';
+// import { Reflector } from '@nestjs/core';
+import { RequestionFormCategoryModule } from './tables/requestion-form-category/requestion-form-category.module';
+import { SupplierModule } from './tables/supplier/supplier.module';
+import { ItemCategoryModule } from './tables/item-category/item-category.module';
+import { UnitOfMeasurementModule } from './tables/unit-of-measurement/unit-of-measurement.module';
+import { ApprovalModule } from './tables/approval/approval.module';
+import { ApprovalUserModule } from './tables/approval-user/approval-user.module';
+import { CheckOutRequestFormModule } from './tables/check-out-request-form/check-out-request-form.module';
+import { RequestFormModule } from './tables/request-form/request-form.module';
+import { ItemModule } from './tables/item/item.module';
 
 @Module({
   imports: [
@@ -45,27 +57,15 @@ import { Reflector } from '@nestjs/core';
         installSubscriptionHandlers: true,
         subscriptions: {
           'graphql-ws': true,
-          onConnect: async (
-            connectionParams: any,
-            webSocket: any,
-            context: any,
-          ) => {
-            const ctxt = GqlExecutionContext.create(context);
-            const reflector = new Reflector();
-            const guard = new AccessTokenGuard(reflector);
-            const canActivate = await guard.canActivate(
-              ctxt as ExecutionContext,
-            );
-            if (!canActivate) {
-              throw new Error('Unauthorized');
-            }
-          },
         },
-        playground: false, // Disable GraphQL playground
+        playground: false,
         plugins: [
-          ApolloServerPluginLandingPageLocalDefault({
-            footer: false, // Customization for landing page
-          }),
+          process.env.NODE_ENV === 'production'
+            ? ApolloServerPluginLandingPageProductionDefault({
+                graphRef: 'my-graph-id@my-graph-variant',
+                footer: false,
+              })
+            : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
         ],
       }),
     }),
@@ -80,6 +80,15 @@ import { Reflector } from '@nestjs/core';
     NotesModule,
     UtilityModule,
     SendEmailModule,
+    RequestionFormCategoryModule,
+    SupplierModule,
+    ItemCategoryModule,
+    UnitOfMeasurementModule,
+    ApprovalModule,
+    ApprovalUserModule,
+    CheckOutRequestFormModule,
+    RequestFormModule,
+    ItemModule,
   ],
   providers: [
     PrismaService,

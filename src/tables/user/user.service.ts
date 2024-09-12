@@ -38,7 +38,7 @@ export class UserService {
             createUserInput.companies?.length > 0
               ? {
                   createMany: {
-                    data: createUserInput.companies?.map((company) => {
+                    data: createUserInput.companies.map((company) => {
                       return {
                         company_id: company.company_id,
                       };
@@ -50,7 +50,7 @@ export class UserService {
             createUserInput.departments?.length > 0
               ? {
                   createMany: {
-                    data: createUserInput.departments?.map((department) => {
+                    data: createUserInput.departments.map((department) => {
                       return {
                         department_id: department.department_id,
                       };
@@ -67,6 +67,7 @@ export class UserService {
               password: await this.utilityService.hashPassword(
                 createUserInput.user_account.password,
               ),
+              role_id: createUserInput.user_account.role_id,
             },
           },
         },
@@ -245,18 +246,6 @@ export class UserService {
         throw new NotAcceptableException('User not found');
       }
 
-      const existingCompanyInUser = user.companies.map((company) => {
-        return {
-          id: company.id,
-        };
-      });
-
-      const existingDepartmentInUser = user.departments.map((department) => {
-        return {
-          id: department.id,
-        };
-      });
-
       const update_user = await this.prismaService.user.update({
         where: {
           id: id,
@@ -268,36 +257,39 @@ export class UserService {
           email: updateUserInput.email,
           phone_number: updateUserInput.phone_number,
           position: updateUserInput.position,
-          companies: {
-            disconnect: existingCompanyInUser.map((company) => {
-              return {
-                id: company.id,
-              };
-            }),
-            connect: updateUserInput.companies?.map((company) => {
-              return {
-                id: company.company_id,
-              };
-            }),
-          },
-          departments: {
-            disconnect: existingDepartmentInUser.map((department) => {
-              return {
-                id: department.id,
-              };
-            }),
-            connect: updateUserInput.departments?.map((department) => {
-              return {
-                id: department.department_id,
-              };
-            }),
-          },
+          companies:
+            updateUserInput.companies.length > 0
+              ? {
+                  deleteMany: {},
+                  createMany: {
+                    data: updateUserInput.companies.map((company) => {
+                      return {
+                        company_id: company.company_id,
+                      };
+                    }),
+                  },
+                }
+              : undefined,
+          departments:
+            updateUserInput.departments.length > 0
+              ? {
+                  deleteMany: {},
+                  createMany: {
+                    data: updateUserInput.departments.map((department) => {
+                      return {
+                        department_id: department.department_id,
+                      };
+                    }),
+                  },
+                }
+              : undefined,
           user_account: {
             update: {
               email: updateUserInput.email,
               username:
                 updateUserInput.user_account.username ||
                 updateUserInput.email.split('@')[0],
+              role_id: updateUserInput.user_account.role_id,
             },
           },
         },
@@ -329,6 +321,8 @@ export class UserService {
         },
         include: {
           user_account: true,
+          companies: true,
+          departments: true,
         },
       });
 

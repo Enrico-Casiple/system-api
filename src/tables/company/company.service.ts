@@ -30,24 +30,9 @@ export class CompanyService {
           short_name: createCompanyInput.short_name,
           location: createCompanyInput.location,
           president_id: createCompanyInput.president_id,
-          company_users: {
-            createMany: {
-              data: createCompanyInput.company_users.map((user) => {
-                return {
-                  user_id: user.user_id,
-                };
-              }),
-            },
-          },
         },
         include: {
           president: true,
-          company_users: {
-            include: {
-              user: true,
-              company: true,
-            },
-          },
           departments: true,
         },
       });
@@ -160,11 +145,15 @@ export class CompanyService {
         include: {
           president: true,
           departments: true,
+<<<<<<< HEAD
           company_users: {
             include: {
               user: true,
             },
           },
+=======
+          company_users: true,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
       if (!company) {
@@ -225,6 +214,11 @@ export class CompanyService {
             },
           },
         },
+        include: {
+          president: true,
+          departments: true,
+          company_users: true,
+        },
       });
 
       return updateCompany;
@@ -248,6 +242,11 @@ export class CompanyService {
       const deleteCompany = await this.prisma.company.delete({
         where: {
           id: id,
+        },
+        include: {
+          president: true,
+          departments: true,
+          company_users: true,
         },
       });
       return deleteCompany;

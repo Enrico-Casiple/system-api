@@ -33,7 +33,7 @@ model User {
   user_account User_Account?
 
   requests               RequestionForm[] @relation("Requester")
-  requests_verifier      RequestionForm[] @relation("Verifier")
+  requests_verifier      RequestionFormCategory[] @relation("Verifier")
   user_approval          ApprovalUser[]   @relation("Approver")
   item_category_approval ItemCategory[]   @relation("SecondayApproval")
 
@@ -56,7 +56,7 @@ model Company_User {
   company_id String  @db.ObjectId
   company    Company @relation("Company", fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id    String? @db.ObjectId
-  user       User?   @relation("CompanyUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User?   @relation("CompanyUser", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -70,7 +70,7 @@ model Department_User {
   department_id String     @db.ObjectId
   department    Department @relation("Department", fields: [department_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id       String?    @db.ObjectId
-  user          User?      @relation("DepartmentUser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User?      @relation("DepartmentUser", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -118,12 +118,12 @@ model Department {
 
 model User_Account {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  email    String @unique
-  username String @unique
+  email    String  @unique
+  username String  @unique
   password String?
 
   user    User?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id String  @unique @db.ObjectId
+  user_id String   @unique @db.ObjectId
   role    Role[]   @relation(fields: [role_id], references: [id])
   role_id String[] @db.ObjectId
 
@@ -230,7 +230,7 @@ model Notes {
   user_account_id String?       @unique @db.ObjectId
   user_account    User_Account? @relation(fields: [user_account_id], references: [id])
 
-  requestion_forms_id String?       @db.ObjectId
+  requestion_forms_id String?         @db.ObjectId
   requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   created_at DateTime @default(now())
@@ -252,16 +252,13 @@ model RequestionForm {
   //Who is the approver
   approval_id      String?   @db.ObjectId
   approval         Approval? @relation("ApproverList", fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  //whos is the verifier
-  user_verifier_id String?   @db.ObjectId
-  verifier         User?     @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   status REQUESTION_STATUS @default(PENDING)
 
   requestForm_category_id String?                 @db.ObjectId
   requestForm_category    RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  notes Notes[]
+  notes               Notes[]
   CheckOutRequestForm CheckOutRequestForm?
 
   isVerified Boolean  @default(false)
@@ -285,9 +282,15 @@ enum REQUESTION_STATUS {
 
 model RequestionFormCategory {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  
   name             String?
   short_name       String?
+
   requestion_forms RequestionForm[]
+
+  user_verifier_id String? @db.ObjectId
+  user_verifier    User?   @relation("Verifier", fields: [user_verifier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
 
@@ -372,38 +375,39 @@ model UnitOfMeasurement {
 }
 
 model Approval {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  user_approval_id String?        @db.ObjectId
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  description      String?
+  user_approval_id String?          @db.ObjectId
   user_approval    ApprovalUser[]
   requestion_forms RequestionForm[] @relation("ApproverList")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
 
   @@map("approval")
 }
 
 model ApprovalUser {
-  id               String       @id @default(auto()) @map("_id") @db.ObjectId
-  level            Int?          // Indicates the level of approval, e.g., 1 for first, 2 for second, etc.
-  approver_id      String?      @db.ObjectId
-  approver         User?        @relation("Approver",fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  item_category_id String?      @db.ObjectId
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  level            Int? // Indicates the level of approval, e.g., 1 for first, 2 for second, etc.
+  approver_id      String?       @db.ObjectId
+  approver         User?         @relation("Approver", fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item_category_id String?       @db.ObjectId
   item_category    ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  approval_id      String       @db.ObjectId
-  approval         Approval     @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at       DateTime     @default(now())
-  updated_at       DateTime     @updatedAt
+  approval_id      String        @db.ObjectId
+  approval         Approval      @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
 
   @@map("approval_user")
 }
 
 model CheckOutRequestForm {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  requestion_forms_id String?       @unique @db.ObjectId
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  requestion_forms_id String?         @unique @db.ObjectId
   requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+
   @@map("checkout_request_form")
 }

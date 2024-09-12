@@ -149,6 +149,84 @@ type User {
   updated_at: DateTime
 }
 
+type RequestForm {
+  id: String
+  name: String
+  description: String
+  user_id: String
+  requester: User
+  approval_id: String
+  status: String
+  requestForm_category_id: String
+  notes: [Note!]
+  isVerified: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type RequestionFormCategory {
+  id: String
+  name: String
+  short_name: String
+  requestion_forms: [RequestForm!]
+  user_verifier_id: String
+  user_verifier: User
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Supplier {
+  id: String
+  name: String
+  address: String
+  contact_person: String
+  contact_number: String
+  email: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type ItemCategory {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type UnitOfMeasurement {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Approval {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type ApprovalUser {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type CheckOutRequestForm {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Item {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  price: Float
+  total_price: Float
+  unit_of_measurement_id: String
+  item_category_id: String
+  supplier_id: String
+  requestion_forms_id: String
+  item_status: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
 type Query {
   users: [User!]!
   user(email: String!): User!
@@ -165,6 +243,16 @@ type Query {
   resetPassword(email: String!): String!
   notes: [Note!]!
   note(id: String!): Note!
+  requestionFormCategory(id: String!): RequestionFormCategory!
+  supplier(id: String!): Supplier!
+  itemCategory(id: Int!): ItemCategory!
+  unitOfMeasurement(id: Int!): UnitOfMeasurement!
+  approval(id: Int!): Approval!
+  approvalUser(id: Int!): ApprovalUser!
+  checkOutRequestForm(id: Int!): CheckOutRequestForm!
+  requestForms: [RequestForm!]!
+  requestForm(id: String!): RequestForm!
+  item(id: String!): Item!
 }
 
 type Mutation {
@@ -191,6 +279,33 @@ type Mutation {
   createNote(createNoteInput: CreateNoteInput!): Note!
   updateNote(updateNoteInput: UpdateNoteInput!): Note!
   removeNote(id: String!): Note!
+  createRequestionFormCategory(createRequestionFormCategoryInput: CreateRequestionFormCategoryInput!): RequestionFormCategory!
+  updateRequestionFormCategory(updateRequestionFormCategoryInput: UpdateRequestionFormCategoryInput!): RequestionFormCategory!
+  removeRequestionFormCategory(id: String!): RequestionFormCategory!
+  createSupplier(createSupplierInput: CreateSupplierInput!): Supplier!
+  updateSupplier(updateSupplierInput: UpdateSupplierInput!): Supplier!
+  removeSupplier(id: String!): Supplier!
+  createItemCategory(createItemCategoryInput: CreateItemCategoryInput!): ItemCategory!
+  updateItemCategory(updateItemCategoryInput: UpdateItemCategoryInput!): ItemCategory!
+  removeItemCategory(id: Int!): ItemCategory!
+  createUnitOfMeasurement(createUnitOfMeasurementInput: CreateUnitOfMeasurementInput!): UnitOfMeasurement!
+  updateUnitOfMeasurement(updateUnitOfMeasurementInput: UpdateUnitOfMeasurementInput!): UnitOfMeasurement!
+  removeUnitOfMeasurement(id: Int!): UnitOfMeasurement!
+  createApproval(createApprovalInput: CreateApprovalInput!): Approval!
+  updateApproval(updateApprovalInput: UpdateApprovalInput!): Approval!
+  removeApproval(id: Int!): Approval!
+  createApprovalUser(createApprovalUserInput: CreateApprovalUserInput!): ApprovalUser!
+  updateApprovalUser(updateApprovalUserInput: UpdateApprovalUserInput!): ApprovalUser!
+  removeApprovalUser(id: Int!): ApprovalUser!
+  createCheckOutRequestForm(createCheckOutRequestFormInput: CreateCheckOutRequestFormInput!): CheckOutRequestForm!
+  updateCheckOutRequestForm(updateCheckOutRequestFormInput: UpdateCheckOutRequestFormInput!): CheckOutRequestForm!
+  removeCheckOutRequestForm(id: Int!): CheckOutRequestForm!
+  createRequestForm(createRequestFormInput: CreateRequestFormInput!): RequestForm!
+  updateRequestForm(updateRequestFormInput: UpdateRequestFormInput!): RequestForm!
+  removeRequestForm(id: String!): RequestForm!
+  createItem(createItemInput: CreateItemInput!): Item!
+  updateItem(updateItemInput: UpdateItemInput!): Item!
+  removeItem(id: String!): Item!
 }
 
 input CreateUserInput {
@@ -428,6 +543,167 @@ input UpdateNoteInput {
   user_account_id: String
   user_account: CreateUserAccountInput
   requestion_forms_id: DateTime
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateRequestionFormCategoryInput {
+  id: String
+  name: String
+  short_name: String
+  requestion_forms: [CreateRequestFormInput!]
+  user_verifier_id: String
+  user_verifier: CreateUserInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateRequestFormInput {
+  id: String
+  name: String
+  description: String
+  user_id: String
+  requester: CreateUserInput
+  approval_id: String
+  status: String
+  requestForm_category_id: String
+  notes: [CreateNoteInput!]
+  isVerified: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateRequestionFormCategoryInput {
+  id: String
+  name: String
+  short_name: String
+  requestion_forms: [CreateRequestFormInput!]
+  user_verifier_id: String
+  user_verifier: CreateUserInput
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateSupplierInput {
+  id: String
+  name: String
+  address: String
+  contact_person: String
+  contact_number: String
+  email: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateSupplierInput {
+  id: String
+  name: String
+  address: String
+  contact_person: String
+  contact_number: String
+  email: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateItemCategoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateItemCategoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input CreateUnitOfMeasurementInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateUnitOfMeasurementInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input CreateApprovalInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateApprovalInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input CreateApprovalUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateApprovalUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input CreateCheckOutRequestFormInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateCheckOutRequestFormInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateRequestFormInput {
+  id: String
+  name: String
+  description: String
+  user_id: String
+  requester: CreateUserInput
+  approval_id: String
+  status: String
+  requestForm_category_id: String
+  notes: [CreateNoteInput!]
+  isVerified: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateItemInput {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  price: Float
+  total_price: Float
+  unit_of_measurement_id: String
+  item_category_id: String
+  supplier_id: String
+  requestion_forms_id: String
+  item_status: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input UpdateItemInput {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  price: Float
+  total_price: Float
+  unit_of_measurement_id: String
+  item_category_id: String
+  supplier_id: String
+  requestion_forms_id: String
+  item_status: String
   created_at: DateTime
   updated_at: DateTime
 }

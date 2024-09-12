@@ -34,6 +34,7 @@ export class DepartmentService {
           company_id: createDepartmentInput.company_id,
           manager_id: createDepartmentInput.manager_id,
           supervisor_id: createDepartmentInput.supervisor_id,
+<<<<<<< HEAD
           department_users: {
             createMany: {
               data: createDepartmentInput.department_users.map((user) => {
@@ -43,6 +44,22 @@ export class DepartmentService {
               }),
             },
           },
+=======
+          department_users:
+            createDepartmentInput.department_users?.length > 0
+              ? {
+                  createMany: {
+                    data: createDepartmentInput.department_users?.map(
+                      (user) => {
+                        return {
+                          user_id: user.user_id,
+                        };
+                      },
+                    ),
+                  },
+                }
+              : undefined,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
         include: {
           company: true,
@@ -108,11 +125,15 @@ export class DepartmentService {
           company: true,
           manager: true,
           supervisor: true,
+<<<<<<< HEAD
           department_users: {
             include: {
               user: true,
             },
           },
+=======
+          department_users: true,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
 
@@ -145,11 +166,15 @@ export class DepartmentService {
           company: true,
           manager: true,
           supervisor: true,
+<<<<<<< HEAD
           department_users: {
             include: {
               user: true,
             },
           },
+=======
+          department_users: true,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
 
@@ -176,11 +201,15 @@ export class DepartmentService {
           company: true,
           manager: true,
           supervisor: true,
+<<<<<<< HEAD
           department_users: {
             include: {
               user: true,
             },
           },
+=======
+          department_users: true,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
 
@@ -245,11 +274,15 @@ export class DepartmentService {
           company: true,
           manager: true,
           supervisor: true,
+<<<<<<< HEAD
           department_users: {
             include: {
               user: true,
             },
           },
+=======
+          department_users: true,
+>>>>>>> 4825b59640defa216c62006b2f91a6b9c25abd85
         },
       });
 
@@ -276,6 +309,12 @@ export class DepartmentService {
       const delete_department = await this.prismaService.department.delete({
         where: {
           id: department.id,
+        },
+        include: {
+          company: true,
+          manager: true,
+          supervisor: true,
+          department_users: true,
         },
       });
       return delete_department;
