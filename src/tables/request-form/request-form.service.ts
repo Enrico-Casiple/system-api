@@ -49,7 +49,13 @@ export class RequestFormService {
         },
         include: {
           requester: true,
-          items: true,
+          items: {
+            include: {
+              unit_of_measurement: true,
+              item_category: true,
+              supplier: true,
+            },
+          },
           approval: true,
           requestForm_category: true,
         },

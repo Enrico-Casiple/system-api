@@ -24,7 +24,6 @@ export class ApprovalService {
                       return {
                         level: user.level,
                         approver_id: user.approver_id,
-                        item_category_id: user.item_category_id ?? null,
                       };
                     }),
                   },
