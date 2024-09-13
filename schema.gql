@@ -243,6 +243,7 @@ type Supplier {
   contact_person: String
   contact_number: String
   email: String
+  items: [Item!]
   created_at: DateTime
   updated_at: DateTime
 }

@@ -1,4 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
+import { Item } from 'src/tables/item/entities/item.entity';
 
 @ObjectType()
 export class Supplier {
@@ -14,6 +15,8 @@ export class Supplier {
   contact_number: string | null;
   @Field(() => String, { nullable: true })
   email: string | null;
+  @Field(() => [Item], { nullable: true })
+  items: Item[];
   @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })
