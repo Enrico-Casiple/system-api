@@ -19,6 +19,7 @@ export class ItemCategoryService {
           user_approval_id: createItemCategoryInput.user_approval_id,
         },
         include: {
+          user_approval: true,
           approvalUser: true,
           items: true,
         },
@@ -43,6 +44,7 @@ export class ItemCategoryService {
         include: {
           approvalUser: true,
           items: true,
+          user_approval: true,
         },
       });
       return itemCategories;
@@ -71,6 +73,7 @@ export class ItemCategoryService {
         include: {
           approvalUser: true,
           items: true,
+          user_approval: true,
         },
       });
 
@@ -108,6 +111,7 @@ export class ItemCategoryService {
         include: {
           approvalUser: true,
           items: true,
+          user_approval: true,
         },
       });
       return update;

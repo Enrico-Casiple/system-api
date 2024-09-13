@@ -278,6 +278,7 @@ type Query {
   requestionFormCategory(id: String!): RequestionFormCategory!
   suppliers: [Supplier!]!
   supplier(id: String!): Supplier!
+  itemCategories: [ItemCategory!]!
   itemCategory(id: String!): ItemCategory!
   unitOfMeasurements: [UnitOfMeasurement!]!
   unitOfMeasurement(id: String!): UnitOfMeasurement!

@@ -27,7 +27,7 @@ export class ItemCategoryResolver {
     return create;
   }
 
-  @Query(() => [ItemCategory], { name: 'itemCategory' })
+  @Query(() => [ItemCategory], { name: 'itemCategories' })
   findAll() {
     return this.itemCategoryService.findAll();
   }
