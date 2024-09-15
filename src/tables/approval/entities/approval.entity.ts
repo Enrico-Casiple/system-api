@@ -11,10 +11,10 @@ export class Approval implements PrismaApproval {
   name: string;
   @Field(() => String, { nullable: true })
   description: string | null;
-  @Field(() => String, { nullable: true })
-  user_approval_id: string | null;
-  @Field(() => ApprovalUser, { nullable: true })
-  user_approval: ApprovalUser;
+  @Field(() => [String], { nullable: true })
+  user_approval_id: string[] | null;
+  @Field(() => [ApprovalUser], { nullable: true })
+  user_approval: [ApprovalUser];
   @Field(() => [RequestForm], { nullable: true })
   requestion_forms: RequestForm[];
   @Field(() => Date, { nullable: true })

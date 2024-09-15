@@ -10,8 +10,8 @@ export class CreateApprovalInput implements Approval {
   name: string;
   @Field(() => String, { nullable: true })
   description: string | null;
-  @Field(() => String, { nullable: true })
-  user_approval_id: string | null;
+  @Field(() => [String], { nullable: true })
+  user_approval_id: string[] | null;
   @Field(() => [CreateApprovalUserInput], { nullable: true })
   user_approval: CreateApprovalUserInput[];
   @Field(() => Date, { nullable: true })

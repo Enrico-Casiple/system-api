@@ -17,13 +17,14 @@ export class ApprovalService {
           name: createApprovalInput.name,
           description: createApprovalInput.description,
           user_approval:
-            createApprovalInput.user_approval_id.length > 0
+            createApprovalInput.user_approval?.length > 0
               ? {
                   createMany: {
                     data: createApprovalInput.user_approval.map((user) => {
                       return {
                         level: user.level,
-                        approver_id: user.approver_id,
+                        approver_id: user.approver_id ?? null,
+                        item_category_id: user.item_category_id ?? null,
                       };
                     }),
                   },
@@ -31,8 +32,16 @@ export class ApprovalService {
               : undefined,
         },
         include: {
-          user_approval: true,
-          requestion_forms: true,
+          user_approval: {
+            include: {
+              approver: true,
+              item_category: {
+                include: {
+                  user_approval: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -49,7 +58,12 @@ export class ApprovalService {
     try {
       const approvals = await this.prismaService.approval.findMany({
         include: {
-          user_approval: true,
+          user_approval: {
+            include: {
+              approver: true,
+              item_category: true,
+            },
+          },
           requestion_forms: true,
         },
       });
@@ -79,7 +93,12 @@ export class ApprovalService {
           id: id,
         },
         include: {
-          user_approval: true,
+          user_approval: {
+            include: {
+              approver: true,
+              item_category: true,
+            },
+          },
           requestion_forms: true,
         },
       });
@@ -129,7 +148,12 @@ export class ApprovalService {
               : undefined,
         },
         include: {
-          user_approval: true,
+          user_approval: {
+            include: {
+              approver: true,
+              item_category: true,
+            },
+          },
           requestion_forms: true,
         },
       });
@@ -152,7 +176,12 @@ export class ApprovalService {
           id: id,
         },
         include: {
-          user_approval: true,
+          user_approval: {
+            include: {
+              approver: true,
+              item_category: true,
+            },
+          },
           requestion_forms: true,
         },
       });

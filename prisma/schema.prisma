@@ -366,7 +366,7 @@ model UnitOfMeasurement {
   symbol            String?
   base_unit         String?
   conversion_factor Float?
-  resutl_unit       String?
+  result_unit       String?
   items             Item[]
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
@@ -378,7 +378,6 @@ model Approval {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
   name             String
   description      String?
-  user_approval_id String?          @db.ObjectId
   user_approval    ApprovalUser[]
   requestion_forms RequestionForm[] @relation("ApproverList")
   created_at       DateTime         @default(now())
@@ -394,8 +393,8 @@ model ApprovalUser {
   approver         User?         @relation("Approver", fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   item_category_id String?       @db.ObjectId
   item_category    ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  approval_id      String        @db.ObjectId
-  approval         Approval      @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  approval_id      String       @db.ObjectId
+  approval         Approval?      @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at       DateTime      @default(now())
   updated_at       DateTime      @updatedAt
 

@@ -18,7 +18,7 @@ export class UnitOfMeasurementService {
           symbol: createUnitOfMeasurementInput.symbol,
           base_unit: createUnitOfMeasurementInput.base_unit,
           conversion_factor: createUnitOfMeasurementInput.conversion_factor,
-          resutl_unit: createUnitOfMeasurementInput.resutl_unit,
+          result_unit: createUnitOfMeasurementInput.result_unit,
         },
         include: {
           items: true,
@@ -108,7 +108,7 @@ export class UnitOfMeasurementService {
           symbol: updateUnitOfMeasurementInput.symbol,
           base_unit: updateUnitOfMeasurementInput.base_unit,
           conversion_factor: updateUnitOfMeasurementInput.conversion_factor,
-          resutl_unit: updateUnitOfMeasurementInput.resutl_unit,
+          result_unit: updateUnitOfMeasurementInput.result_unit,
         },
         include: {
           items: true,

@@ -179,6 +179,7 @@ type ApprovalUser {
   id: String
   level: Int
   approver_id: String
+  approver: User
   item_category_id: String
   item_category: ItemCategory
   approval_id: String
@@ -191,8 +192,8 @@ type Approval {
   id: String
   name: String
   description: String
-  user_approval_id: String
-  user_approval: ApprovalUser
+  user_approval_id: [String!]
+  user_approval: [ApprovalUser!]
   requestion_forms: [RequestForm!]
   created_at: DateTime
   updated_at: DateTime
@@ -254,7 +255,7 @@ type UnitOfMeasurement {
   symbol: String
   base_unit: String
   conversion_factor: Int
-  resutl_unit: String
+  result_unit: String
   items: [Item!]
   created_at: DateTime
   updated_at: DateTime
@@ -276,6 +277,7 @@ type Query {
   resetPassword(email: String!): String!
   notes: [Note!]!
   note(id: String!): Note!
+  requestionFormCategories: [RequestionFormCategory!]!
   requestionFormCategory(id: String!): RequestionFormCategory!
   suppliers: [Supplier!]!
   supplier(id: String!): Supplier!
@@ -635,7 +637,7 @@ input CreateApprovalInput {
   id: String
   name: String
   description: String
-  user_approval_id: String
+  user_approval_id: [String!]
   user_approval: [CreateApprovalUserInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -718,7 +720,7 @@ input CreateUnitOfMeasurementInput {
   symbol: String
   base_unit: String
   conversion_factor: Int
-  resutl_unit: String
+  result_unit: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -729,7 +731,7 @@ input UpdateUnitOfMeasurementInput {
   symbol: String
   base_unit: String
   conversion_factor: Int
-  resutl_unit: String
+  result_unit: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -738,7 +740,7 @@ input UpdateApprovalInput {
   id: String
   name: String
   description: String
-  user_approval_id: String
+  user_approval_id: [String!]
   user_approval: [CreateApprovalUserInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -806,6 +808,7 @@ type Subscription {
   supplierCreated: Supplier!
   itemCategoryCreated: ItemCategory!
   unitOfMeasurementCreated: UnitOfMeasurement!
+  approvalCreated: Approval!
   approvalUserCreated: ApprovalUser!
   checkOutRequestFormCreated: CheckOutRequestForm!
   requestFormCreated: RequestForm!

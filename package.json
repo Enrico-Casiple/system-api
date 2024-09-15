@@ -9,7 +9,7 @@
     "build": "npx prisma generate && npx prisma format && npx prisma db push && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "dev": "concurrently \"nest start --watch \" \"npx prisma studio\"",
+    "dev": "npx prisma db push && concurrently \"nest start --watch \" \"npx prisma studio\"",
     "start:dev": "npx prisma db push && concurrently \"nest build \" \"npx prisma studio\"",
     "start:build": "concurrently \"npm run build \" \"npx prisma studio\"",
     "prisma:reset": "npx prisma generate && npx prisma db push --force-reset && npx prisma format",

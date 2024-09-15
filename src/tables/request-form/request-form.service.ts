@@ -56,8 +56,25 @@ export class RequestFormService {
               supplier: true,
             },
           },
-          approval: true,
-          requestForm_category: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
         },
       });
       return create;

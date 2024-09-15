@@ -14,7 +14,7 @@ export class CreateUnitOfMeasurementInput implements UnitOfMeasurement {
   @Field(() => Int, { nullable: true })
   conversion_factor: number | null;
   @Field(() => String, { nullable: true })
-  resutl_unit: string | null;
+  result_unit: string | null;
   @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })

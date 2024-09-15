@@ -26,7 +26,7 @@ export class RequestionFormCategoryResolver {
     return create;
   }
 
-  @Query(() => [RequestionFormCategory], { name: 'requestionFormCategory' })
+  @Query(() => [RequestionFormCategory], { name: 'requestionFormCategories' })
   findAll() {
     return this.requestionFormCategoryService.findAll();
   }

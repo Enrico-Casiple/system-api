@@ -21,7 +21,11 @@ export class ApprovalUserService {
         },
         include: {
           approver: true,
-          item_category: true,
+          item_category: {
+            include: {
+              user_approval: true,
+            },
+          },
           approval: true,
         },
       });
