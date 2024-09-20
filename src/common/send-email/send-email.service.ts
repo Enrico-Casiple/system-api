@@ -3,6 +3,7 @@ import { LoggersService } from '../log/log.service';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import XOAuth2 from 'nodemailer/lib/xoauth2';
 
 type EmailOptions = {
   from?: string;

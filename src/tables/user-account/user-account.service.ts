@@ -145,6 +145,8 @@ export class UserAccountService {
       const session =
         await this.sessionService.updateOrCreateSession(token_info);
 
+  
+
       return session;
     } catch (error) {
       this.logger.error(
@@ -419,4 +421,3 @@ export class UserAccountService {
     }
   }
 }
-

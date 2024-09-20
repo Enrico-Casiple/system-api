@@ -251,7 +251,7 @@ model RequestionForm {
   items            Item[]
   //Who is the approver
   approval_id      String?   @db.ObjectId
-  approval         Approval? @relation("ApproverList", fields: [approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approval         Approval? @relation("ApproverList", fields: [approval_id], references: [id])
 
   status REQUESTION_STATUS @default(PENDING)
 

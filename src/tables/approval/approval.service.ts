@@ -23,8 +23,8 @@ export class ApprovalService {
                     data: createApprovalInput.user_approval.map((user) => {
                       return {
                         level: user.level,
-                        approver_id: user.approver_id ?? null,
-                        item_category_id: user.item_category_id ?? null,
+                        approver_id: user.approver_id.length === 0 ? null : user.approver_id,
+                        item_category_id: user.item_category_id.length === 0 ? null : user.item_category_id,
                       };
                     }),
                   },
@@ -132,15 +132,15 @@ export class ApprovalService {
           name: updateApprovalInput.name,
           description: updateApprovalInput.description,
           user_approval:
-            updateApprovalInput.user_approval_id.length > 0
+            updateApprovalInput.user_approval?.length > 0
               ? {
                   deleteMany: {},
                   createMany: {
                     data: updateApprovalInput.user_approval.map((user) => {
                       return {
                         level: user.level,
-                        approver_id: user.approver_id,
-                        item_category_id: user.item_category_id ?? null,
+                        approver_id: user.approver_id === '' ? null : user.approver_id,
+                        item_category_id: user.item_category_id === '' ? null : user.item_category_id,
                       };
                     }),
                   },
