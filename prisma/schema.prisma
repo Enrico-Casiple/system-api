@@ -282,7 +282,6 @@ enum REQUESTION_STATUS {
 
 model RequestionFormCategory {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
-  
   name             String?
   short_name       String?
 
@@ -312,7 +311,7 @@ model Item {
   supplier_id            String?            @db.ObjectId
   supplier               Supplier?          @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   requestion_forms_id    String?            @db.ObjectId
-  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id])
 
   item_status ITEM_STATUS @default(PENDING)
 

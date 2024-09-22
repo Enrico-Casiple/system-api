@@ -23,8 +23,14 @@ export class ApprovalService {
                     data: createApprovalInput.user_approval.map((user) => {
                       return {
                         level: user.level,
-                        approver_id: user.approver_id.length === 0 ? null : user.approver_id,
-                        item_category_id: user.item_category_id.length === 0 ? null : user.item_category_id,
+                        approver_id:
+                          user.approver_id?.length === 0
+                            ? null
+                            : user.approver_id,
+                        item_category_id:
+                          user.item_category_id?.length === 0
+                            ? null
+                            : user.item_category_id,
                       };
                     }),
                   },
