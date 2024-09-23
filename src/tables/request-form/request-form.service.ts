@@ -96,7 +96,20 @@ export class RequestFormService {
         include: {
           requester: true,
           items: true,
-          approval: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    }
+                  }
+                }
+              }
+            }
+          },
           requestForm_category: true,
         },
       });
@@ -126,7 +139,20 @@ export class RequestFormService {
         include: {
           requester: true,
           items: true,
-          approval: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    }
+                  }
+                }
+              }
+            }
+          },
           requestForm_category: true,
         },
       });
@@ -155,6 +181,8 @@ export class RequestFormService {
   async update(id: string, updateRequestFormInput: UpdateRequestFormInput) {
     try {
       await this.findOne(id);
+      
+
       const update = await this.prismaService.requestionForm.update({
         where: { id },
         data: {
@@ -175,14 +203,14 @@ export class RequestFormService {
                         total_price: item.quantity * item.price,
                         unit_of_measurement_id: item.unit_of_measurement_id,
                         item_category_id: item.item_category_id,
-                        supplier_id: item.supplier_id,
+                        supplier_id: item.supplier_id === '' ? null : item.supplier_id,
                         item_status: item.item_status,
                       };
                     }),
                   },
                 }
               : undefined,
-          approval_id: updateRequestFormInput.approval_id,
+          approval_id: updateRequestFormInput.approval_id === '' ? null : updateRequestFormInput.approval_id,
           status: updateRequestFormInput.status,
           requestForm_category_id:
             updateRequestFormInput.requestForm_category_id,

@@ -311,7 +311,7 @@ model Item {
   supplier_id            String?            @db.ObjectId
   supplier               Supplier?          @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   requestion_forms_id    String?            @db.ObjectId
-  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id])
+  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   item_status ITEM_STATUS @default(PENDING)
 
