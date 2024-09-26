@@ -94,7 +94,20 @@ export class RequestFormService {
     try {
       const requestForm = await this.prismaService.requestionForm.findMany({
         include: {
-          requester: true,
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
           items: true,
           approval: {
             include: {
@@ -136,8 +149,21 @@ export class RequestFormService {
       }
       const requestForm = await this.prismaService.requestionForm.findUnique({
         where: { id },
-        include: {
-          requester: true,
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
           items: true,
           approval: {
             include: {

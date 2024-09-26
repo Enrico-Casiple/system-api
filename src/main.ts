@@ -9,6 +9,7 @@ async function bootstrap() {
   const configService = app.get<ConfigService>(ConfigService);
   const PORT = configService.get<number>('PORT') || 5173;
 
+
   app.useGlobalFilters(new ErrorHandlerFilter());
   app.enableCors({
     origin: '*',
