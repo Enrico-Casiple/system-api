@@ -231,7 +231,7 @@ model Notes {
   user_account    User_Account? @relation(fields: [user_account_id], references: [id])
 
   requestion_forms_id String?         @db.ObjectId
-  requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
