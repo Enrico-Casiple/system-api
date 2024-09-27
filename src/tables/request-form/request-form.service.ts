@@ -187,7 +187,8 @@ export class RequestFormService {
             include: {
               user_verifier: true,
             },
-          },
+              },
+          notes: true,
         },
       });
 
