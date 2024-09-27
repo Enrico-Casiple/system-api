@@ -227,7 +227,7 @@ model Notes {
   description String?
   logs        String?
 
-  user_account_id String?       @unique @db.ObjectId
+  user_account_id String?       @db.ObjectId
   user_account    User_Account? @relation(fields: [user_account_id], references: [id])
 
   requestion_forms_id String?         @db.ObjectId
@@ -272,10 +272,10 @@ enum REQUESTION_STATUS {
   DRAFT
   PENDING
   VERIFY
+  REJECTED
   FIRST_APPROVAL
   SECOND_APPROVAL
-  LAST_APPOVAL
-  REJECTED
+  LAST_APPROVAL
   ONGOING
   COMPLETED
 }

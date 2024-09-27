@@ -7,6 +7,7 @@ import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
+import { REQUESTION_STATUS } from '@prisma/client';
 
 @Injectable()
 export class RequestFormService {
@@ -93,62 +94,6 @@ export class RequestFormService {
   async findAll() {
     try {
       const requestForm = await this.prismaService.requestionForm.findMany({
-        include: {
-          requester: {
-            include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
-              departments: {
-                include: {
-                  department: true,
-                },
-              },
-            },
-          },
-          items: true,
-          approval: {
-            include: {
-              user_approval: {
-                include: {
-                  approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    }
-                  }
-                }
-              }
-            }
-          },
-          requestForm_category: true,
-        },
-      });
-
-      return requestForm;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.findAll()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching requestForm: ${error.message}`,
-      );
-    }
-  }
-
-  async findOne(id: string) {
-    try {
-      // Check if the id Is MongoObjectId
-      if (!id.match(/^[0-9a-fA-F]{24}$/) || !id) {
-        this.logger.error('Invalid id', 'RequestFormService.findOne()');
-        throw new BadRequestException('Invalid id');
-      }
-      const requestForm = await this.prismaService.requestionForm.findUnique({
-        where: { id },
           include: {
           requester: {
             include: {
@@ -179,7 +124,70 @@ export class RequestFormService {
               }
             }
           },
-          requestForm_category: true,
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+        },
+      });
+
+      return requestForm;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findAll()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching requestForm: ${error.message}`,
+      );
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      if (!id.match(/^[0-9a-fA-F]{24}$/) || !id) {
+        this.logger.error('Invalid id', 'RequestFormService.findOne()');
+        throw new BadRequestException('Invalid id');
+      }
+      const requestForm = await this.prismaService.requestionForm.findUnique({
+        where: { id },
+            include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    }
+                  }
+                }
+              }
+            }
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
         },
       });
 
@@ -258,6 +266,77 @@ export class RequestFormService {
       );
       throw new InternalServerErrorException(
         `Error occurred while updating requestForm: ${error.message}`,
+      );
+    }
+  }
+
+  async updateStatus(id: string, status: REQUESTION_STATUS, remarks: string, isVerified: boolean) { 
+    try {
+      const requestStatus = await this.findOne(id);
+      const update = await this.prismaService.requestionForm.update({
+        where: { id },
+        data: {
+          isVerified,
+          status,
+          notes: {
+            create: {
+              name: `Status changed from ${requestStatus.status} to ${status} with remarks:`,
+              description: remarks,
+              logs: `
+                Previous status: ${requestStatus.status}
+                New status: ${status}
+                user: ${requestStatus.requester.email}
+                time: ${new Date().toISOString()}
+              `
+            }
+          }
+        },
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    }
+                  }
+                }
+              }
+            }
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+        },
+      });
+      return update;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.updateStatus()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while updating requestForm status: ${error.message}`,
       );
     }
   }

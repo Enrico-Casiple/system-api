@@ -4,6 +4,7 @@ import { RequestForm } from './entities/request-form.entity';
 import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
 import { PubSub } from 'graphql-subscriptions';
+import { REQUESTION_STATUS } from '@prisma/client';
 
 const pubSub = new PubSub();
 @Resolver(() => RequestForm)
@@ -44,11 +45,30 @@ export class RequestFormResolver {
   }
 
   @Mutation(() => RequestForm)
+  updateRequestFormStatus(
+    @Args('id', { type: () => String }) id: string,
+    @Args('status', { type: () => String }) status: REQUESTION_STATUS,
+    @Args('remarks', { type: () => String }) remarks: string,
+    @Args('isVerified', { type: () => Boolean }) isVerified: boolean,
+  ) {
+    const update = this.requestFormService.updateStatus(
+      id,
+      status,
+      remarks,
+      isVerified,
+    );
+    pubSub.publish('requestFormCreated', { requestFormCreated: update });
+    return update;
+  }
+
+  @Mutation(() => RequestForm)
   removeRequestForm(@Args('id', { type: () => String }) id: string) {
     const remove = this.requestFormService.remove(id);
     pubSub.publish('requestFormCreated', { requestFormCreated: remove });
     return remove;
   }
+
+    
 
   @Subscription(() => RequestForm)
   requestFormCreated() {
