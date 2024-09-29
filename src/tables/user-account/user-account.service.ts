@@ -109,7 +109,12 @@ export class UserAccountService {
           ],
         },
         include: {
-          user: true,
+          user: {
+            include: {
+              companies: true,
+              departments: true,
+            },
+          },
         },
       });
 

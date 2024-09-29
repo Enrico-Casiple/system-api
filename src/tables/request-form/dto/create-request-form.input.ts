@@ -2,6 +2,7 @@ import { InputType, Field } from '@nestjs/graphql';
 import { REQUESTION_STATUS, RequestionForm } from '@prisma/client';
 import { CreateApprovalInput } from 'src/tables/approval/dto/create-approval.input';
 import { CreateCheckOutRequestFormInput } from 'src/tables/check-out-request-form/dto/create-check-out-request-form.input';
+import { CreateCompanyInput } from 'src/tables/company/dto/create-company.input';
 import { CreateItemInput } from 'src/tables/item/dto/create-item.input';
 import { CreateNoteInput } from 'src/tables/notes/dto/create-note.input';
 import { CreateRequestionFormCategoryInput } from 'src/tables/requestion-form-category/dto/create-requestion-form-category.input';
@@ -32,6 +33,10 @@ export class CreateRequestFormInput implements RequestionForm {
   requestForm_category_id: string | null;
   @Field(() => CreateRequestionFormCategoryInput, { nullable: true })
   requestForm_category: CreateRequestionFormCategoryInput;
+  @Field(() => String, { nullable: true })
+  company_id: string;
+  @Field(() => CreateCompanyInput, { nullable: true })
+  company: CreateCompanyInput;
   @Field(() => [CreateNoteInput], { nullable: true })
   notes: CreateNoteInput[];
   @Field(() => CreateCheckOutRequestFormInput, { nullable: true })

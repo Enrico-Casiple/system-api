@@ -46,6 +46,7 @@ export class RequestFormService {
           status: createRequestFormInput.status,
           requestForm_category_id:
             createRequestFormInput.requestForm_category_id,
+          company_id: createRequestFormInput.company_id,
           isVerified: createRequestFormInput.isVerified,
         },
         include: {
@@ -76,6 +77,7 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
+          company: true,
         },
       });
       return create;
@@ -94,7 +96,7 @@ export class RequestFormService {
   async findAll() {
     try {
       const requestForm = await this.prismaService.requestionForm.findMany({
-          include: {
+        include: {
           requester: {
             include: {
               companies: {
@@ -118,17 +120,18 @@ export class RequestFormService {
                   item_category: {
                     include: {
                       user_approval: true,
-                    }
-                  }
-                }
-              }
-            }
+                    },
+                  },
+                },
+              },
+            },
           },
           requestForm_category: {
             include: {
               user_verifier: true,
             },
           },
+          company: true,
         },
       });
 
@@ -153,7 +156,7 @@ export class RequestFormService {
       }
       const requestForm = await this.prismaService.requestionForm.findUnique({
         where: { id },
-            include: {
+        include: {
           requester: {
             include: {
               companies: {
@@ -177,18 +180,19 @@ export class RequestFormService {
                   item_category: {
                     include: {
                       user_approval: true,
-                    }
-                  }
-                }
-              }
-            }
+                    },
+                  },
+                },
+              },
+            },
           },
           requestForm_category: {
             include: {
               user_verifier: true,
             },
-              },
+          },
           notes: true,
+          company: true,
         },
       });
 
@@ -238,17 +242,25 @@ export class RequestFormService {
                         total_price: item.quantity * item.price,
                         unit_of_measurement_id: item.unit_of_measurement_id,
                         item_category_id: item.item_category_id,
-                        supplier_id: item.supplier_id === '' ? null : item.supplier_id,
+                        supplier_id:
+                          item.supplier_id === '' ? null : item.supplier_id,
                         item_status: item.item_status,
                       };
                     }),
                   },
                 }
               : undefined,
-          approval_id: updateRequestFormInput.approval_id === '' ? null : updateRequestFormInput.approval_id,
+          approval_id:
+            updateRequestFormInput.approval_id === ''
+              ? null
+              : updateRequestFormInput.approval_id,
           status: updateRequestFormInput.status,
           requestForm_category_id:
             updateRequestFormInput.requestForm_category_id,
+          company_id:
+            updateRequestFormInput.company_id === ''
+              ? null
+              : updateRequestFormInput.company_id,
           isVerified: updateRequestFormInput.isVerified,
         },
         include: {
@@ -256,6 +268,7 @@ export class RequestFormService {
           items: true,
           approval: true,
           requestForm_category: true,
+          company: true,
         },
       });
       return update;
@@ -288,11 +301,11 @@ export class RequestFormService {
                 New status: ${status}
                 user: ${requestStatus.requester.email}
                 time: ${new Date().toISOString()}
-              `
-            }
-          }
+              `,
+            },
+          },
         },
-          include: {
+        include: {
           requester: {
             include: {
               companies: {
@@ -316,17 +329,18 @@ export class RequestFormService {
                   item_category: {
                     include: {
                       user_approval: true,
-                    }
-                  }
-                }
-              }
-            }
+                    },
+                  },
+                },
+              },
+            },
           },
           requestForm_category: {
             include: {
               user_verifier: true,
             },
           },
+          company: true,
         },
       });
       return update;

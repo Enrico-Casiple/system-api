@@ -140,27 +140,13 @@ export class SessionService {
             include: {
               user: {
                 include: {
-                  company_president: {
+                  companies: {
                     include: {
-                      president: true,
-                      departments: {
-                        include: {
-                          manager: true,
-                          supervisor: true,
-                          department_users: {
-                            include: {
-                              user: true,
-                            },
-                          },
-                        },
-                      },
+                      company: true,
                     },
                   },
-                  department_manager: {
-                    include: {
-                      manager: true,
-                      supervisor: true,
-                    },
+                  departments: {
+                    include: {},
                   },
                 },
               },
@@ -187,6 +173,8 @@ export class SessionService {
         await this.sendEmailService.sendEmail(emailInfo);
       }
 
+      delete sessions.user_account.password;
+      
       return sessions;
     } catch (error) {
       this.loggersService.error(

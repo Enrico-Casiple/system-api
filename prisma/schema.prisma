@@ -91,6 +91,8 @@ model Company {
   departments   Department[]
   company_users Company_User[] @relation("Company")
 
+  requestion_forms RequestionForm[]
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -257,7 +259,8 @@ model RequestionForm {
 
   requestForm_category_id String?                 @db.ObjectId
   requestForm_category    RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
+  company_id              String?                 @db.ObjectId
+  company                 Company?                @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   notes               Notes[]
   CheckOutRequestForm CheckOutRequestForm?
 

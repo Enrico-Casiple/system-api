@@ -219,6 +219,8 @@ type RequestForm {
   status: String
   requestForm_category_id: String
   requestForm_category: RequestionFormCategory
+  company_id: String
+  company: Company
   notes: [Note!]
   CheckOutRequestForm: CheckOutRequestForm
   isVerified: Boolean
@@ -611,6 +613,8 @@ input CreateRequestFormInput {
   status: String
   requestForm_category_id: String
   requestForm_category: CreateRequestionFormCategoryInput
+  company_id: String
+  company: CreateCompanyInput
   notes: [CreateNoteInput!]
   CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean
@@ -777,6 +781,8 @@ input UpdateRequestFormInput {
   status: String
   requestForm_category_id: String
   requestForm_category: CreateRequestionFormCategoryInput
+  company_id: String
+  company: CreateCompanyInput
   notes: [CreateNoteInput!]
   CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean

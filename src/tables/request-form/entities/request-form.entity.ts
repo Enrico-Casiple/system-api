@@ -7,6 +7,7 @@ import { Item } from 'src/tables/item/entities/item.entity';
 import { Approval } from 'src/tables/approval/entities/approval.entity';
 import { RequestionFormCategory } from 'src/tables/requestion-form-category/entities/requestion-form-category.entity';
 import { CheckOutRequestForm } from 'src/tables/check-out-request-form/entities/check-out-request-form.entity';
+import { Company } from 'src/tables/company/entities/company.entity';
 
 @ObjectType()
 export class RequestForm implements PrismaRequestionForm {
@@ -32,6 +33,10 @@ export class RequestForm implements PrismaRequestionForm {
   requestForm_category_id: string | null;
   @Field(() => RequestionFormCategory, { nullable: true })
   requestForm_category: RequestionFormCategory;
+  @Field(() => String, { nullable: true })
+  company_id: string;
+  @Field(() => Company, { nullable: true })
+  company: Company;
   @Field(() => [Note], { nullable: true })
   notes: Note[];
   @Field(() => CheckOutRequestForm, { nullable: true })
