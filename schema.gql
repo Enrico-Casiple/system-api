@@ -295,6 +295,7 @@ type Query {
   requestForms: [RequestForm!]!
   viewByRole(id: String!): [RequestForm!]!
   requestForm(id: String!): RequestForm!
+  items: [Item!]!
   item(id: String!): Item!
 }
 

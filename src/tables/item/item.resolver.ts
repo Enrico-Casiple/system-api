@@ -16,7 +16,7 @@ export class ItemResolver {
     return this.itemService.create(createItemInput);
   }
 
-  @Query(() => [Item], { name: 'item' })
+  @Query(() => [Item], { name: 'items' })
   findAll() {
     return this.itemService.findAll();
   }
