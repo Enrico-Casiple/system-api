@@ -7,13 +7,17 @@ import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
-import { REQUESTION_STATUS } from '@prisma/client';
+import {  MODULE, REQUESTION_STATUS } from '@prisma/client';
+import { UserAccountService } from '../user-account/user-account.service';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class RequestFormService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly logger: LoggersService,
+    private readonly userAccountService: UserAccountService,
+    private readonly roleService: RoleService,
   ) {}
   async create(createRequestFormInput: CreateRequestFormInput) {
     try {
@@ -131,16 +135,309 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
+          notes: true,
           company: true,
         },
       });
-
       return requestForm;
     } catch (error) {
       this.logger.error(
         error.message,
         error.stack,
         'RequestFormService.findAll()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching requestForm: ${error.message}`,
+      );
+    }
+  }
+
+  async findByCompany(userId: string) {
+    try {
+      const requestByCompany = await this.prismaService.requestionForm.findMany({
+        where: {
+          company: {
+            president_id: userId,
+          },
+        },
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          notes: true,
+          company: true,
+        },
+      });
+      return requestByCompany;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findByCompanyId()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching findByCompanyId: ${error.message}`,
+      );
+    }
+  }
+
+  async findByDepartment(userId: string) {
+    try {
+      const requestByDepartment = await this.prismaService.requestionForm.findMany({
+        where: {
+          company: {
+            departments: {
+              some: {
+                manager_id: userId,
+              },
+            },
+          },
+        },
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          notes: true,
+          company: true,
+        },
+      });
+      return requestByDepartment;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findByDepartmentId()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching findByDepartmentId: ${error.message}`,
+      );
+    }
+  }
+
+  async findByUserId(userId: string) {
+    try {
+      const requestOwn = await this.prismaService.requestionForm.findMany({
+        where: {
+          user_id: userId,
+        },
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          notes: true,
+          company: true,
+        },
+      });
+      return requestOwn;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findByUserId()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching findByUserId: ${error.message}`,
+      );
+    }
+  }
+
+  async findByRequestCategory(userId: string) {
+    try {
+      const requestCategoryVerfier = await this.prismaService.requestionForm.findMany({
+        where: {
+          requestForm_category: {
+            user_verifier_id: userId,
+          },
+        },
+          include: {
+          requester: {
+            include: {
+              companies: {
+                include: {
+                  company: true,
+                },
+              },
+              departments: {
+                include: {
+                  department: true,
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          notes: true,
+          company: true,
+        },
+      });
+      return requestCategoryVerfier;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findByRequestCategory()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching findByRequestCategory: ${error.message}`,
+      );
+    }
+  }
+
+  async viewByRole(userId: string) {
+    await this.userAccountService.findUserOne(userId);
+    const checkView = await this.roleService.checkViewPermission(
+      userId,
+      'REQUESTION_MANAGEMENT',
+    );
+    if (!checkView) {
+      this.logger.error(
+        'User does not have permission to view request form',
+        'RequestFormService.viewByRole()',
+      );
+      throw new BadRequestException(
+        'User does not have permission to view request form',
+      );
+    }
+    const scope = checkView.map((view) => view.scope);
+    try {
+      const result = await Promise.all(scope.map(async (scope) => {
+        switch (scope) {
+          case 'ALL':
+            return await this.findAll();
+          case 'DEPARTMENT':
+            return await this.findByDepartment(userId);
+          case 'COMPANY':
+            return await this.findByCompany(userId);
+          case 'NON_FOOD':
+            return await this.findByRequestCategory(userId);
+          case 'FOOD':
+            return await this.findByRequestCategory(userId);
+          case 'GSD':
+            return await this.findByRequestCategory(userId);
+          default:
+            return await this.findByUserId(userId);
+        }
+      }));
+    const flattenedResult = result.flat();
+    const uniqueResult = Array.from(new Set(flattenedResult.map(item => item.id)))
+      .map(id => flattenedResult.find(item => item.id === id));
+    return uniqueResult;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.viewByRole()',
       );
       throw new InternalServerErrorException(
         `Error occurred while fetching requestForm: ${error.message}`,

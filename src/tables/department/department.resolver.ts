@@ -24,8 +24,8 @@ export class DepartmentResolver {
   }
 
   @Query(() => [Department], { name: 'departments' })
-  findAll(@Args('currentUserId') currentUserId: string) {
-    return this.departmentService.findAllByRolePermission(currentUserId);
+  findAll() {
+    return this.departmentService.findAll();
   }
 
   @Query(() => Department, { name: 'department' })

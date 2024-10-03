@@ -1,8 +1,11 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Subscription } from '@nestjs/graphql';
 import { ItemService } from './item.service';
 import { Item } from './entities/item.entity';
 import { CreateItemInput } from './dto/create-item.input';
 import { UpdateItemInput } from './dto/update-item.input';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
 
 @Resolver(() => Item)
 export class ItemResolver {
@@ -31,5 +34,10 @@ export class ItemResolver {
   @Mutation(() => Item)
   removeItem(@Args('id', { type: () => String }) id: string) {
     return this.itemService.remove(id);
+  }
+
+  @Subscription(() => Item)
+  companyAdded() {
+    return pubSub.asyncIterator('companyAdded');
   }
 }

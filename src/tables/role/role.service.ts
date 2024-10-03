@@ -65,6 +65,31 @@ export class RoleService {
     }
   }
 
+  async findByAccountId(id: string) { 
+    try {
+      const allRoles = await this.prismaService.role.findMany({
+        where: {
+          user_account: {
+            some: {
+              id: id,
+            },
+          }
+        },
+        include: {
+          permissions: true,
+          user_account: true,
+        },
+      });
+
+      return allRoles;
+    } catch (error) {
+      this.logger.error(error.message, error.stack, 'RoleService.findByAccountId()');
+      throw new InternalServerErrorException(
+        `Error occurred while fetching users: ${error.message}`,
+      );
+    }
+  }
+
   async findOne(id: string) {
     if (!id) {
       this.logger.error('Invalid role id', 'RoleService.findOne()');
@@ -172,7 +197,7 @@ export class RoleService {
   }
 
   async checkViewPermission(userId: string, module: MODULE) {
-    const find_user_account = await this.userAccountService.findOne(userId);
+    const find_user_account = await this.userAccountService.findUserOne(userId);
     if (!find_user_account.role) {
       this.logger.error(
         'User has no role',

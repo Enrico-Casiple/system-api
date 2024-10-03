@@ -26,8 +26,8 @@ export class CompanyResolver {
   }
 
   @Query(() => [Company], { name: 'companies' })
-  findAll(@Args('currentUserId') currentUserId: string) {
-    return this.companyService.findAllByRolePermission(currentUserId);
+  findAll() {
+    return this.companyService.findAll();
   }
 
   @Query(() => Company, { name: 'company' })

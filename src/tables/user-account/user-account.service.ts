@@ -93,6 +93,75 @@ export class UserAccountService {
     }
   }
 
+  async findUserOne(id: string) {
+    try {
+      const userAccount = await this.prismaService.user_Account.findUnique({
+        where: { user_id: id },
+        include: {
+          user: {
+            include: {
+              company_president: {
+                include: {
+                  president: true,
+                  departments: {
+                    include: {
+                      manager: true,
+                      supervisor: true,
+                      department_users: {
+                        include: {
+                          user: true,
+                        },
+                      },
+                    },
+                  },
+                  company_users: {
+                    include: {
+                      user: true,
+                    },
+                  },
+                },
+              },
+              companies: {
+                include: {
+                  user: true,
+                },
+              },
+              departments: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+          role: {
+            include: {
+              permissions: true,
+            },
+          },
+          sessions: true,
+          notes: true,
+        },
+      });
+      if (!userAccount) {
+        this.logger.error(
+          'User account not found',
+          'UserAccountService.findOne()',
+        );
+        throw new InternalServerErrorException('User account not found');
+      }
+      return userAccount;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'UserAccountService.findOne()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while finding user account: ${error.message}`,
+      );
+    }
+  }
+
   async login(loginUserAccountInput: LoginUserAccountInput) {
     try {
       const { user_account, password } = loginUserAccountInput;

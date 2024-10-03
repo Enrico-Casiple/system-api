@@ -75,7 +75,7 @@ export class DepartmentService {
   }
 
   async findAllByRolePermission(currentUserId: string) {
-    await this.userAccountService.findOne(currentUserId);
+    // await this.userAccountService.findOne(currentUserId);
     const checkView = await this.roleService.checkViewPermission(
       currentUserId,
       'DEPARTMENT_MANAGEMENT',

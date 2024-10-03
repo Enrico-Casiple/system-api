@@ -4,7 +4,7 @@ import { RequestForm } from './entities/request-form.entity';
 import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
 import { PubSub } from 'graphql-subscriptions';
-import { REQUESTION_STATUS } from '@prisma/client';
+import { REQUESTION_STATUS, VIEW_SCOPE } from '@prisma/client';
 
 const pubSub = new PubSub();
 @Resolver(() => RequestForm)
@@ -22,8 +22,16 @@ export class RequestFormResolver {
   }
 
   @Query(() => [RequestForm], { name: 'requestForms' })
-  findAll() {
+  findAll(
+  ) {
     return this.requestFormService.findAll();
+  }
+
+  @Query(() => [RequestForm], { name: 'viewByRole' })
+  viewByRole(
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    return this.requestFormService.viewByRole(id);
   }
 
   @Query(() => RequestForm, { name: 'requestForm' })

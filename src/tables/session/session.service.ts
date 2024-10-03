@@ -161,17 +161,17 @@ export class SessionService {
         },
       });
 
-      if (sessions.user_account.user.emailVerified === null) {
-        const emailInfo = {
-          from: this.configService.get('EMAIL_SERVER_USER'),
-          to: sessions.user_account.email,
-          subject: 'Email verification',
-          replyTo: this.configService.get('REPLY_TO'),
-          token: token.accessToken,
-          type: 'email-verify',
-        };
-        await this.sendEmailService.sendEmail(emailInfo);
-      }
+      // if (sessions.user_account.user.emailVerified === null) {
+      //   const emailInfo = {
+      //     from: this.configService.get('EMAIL_SERVER_USER'),
+      //     to: sessions.user_account.email,
+      //     subject: 'Email verification',
+      //     replyTo: this.configService.get('REPLY_TO'),
+      //     token: token.accessToken,
+      //     type: 'email-verify',
+      //   };
+      //   await this.sendEmailService.sendEmail(emailInfo);
+      // }
 
       delete sessions.user_account.password;
       

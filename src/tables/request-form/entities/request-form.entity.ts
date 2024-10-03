@@ -34,7 +34,7 @@ export class RequestForm implements PrismaRequestionForm {
   @Field(() => RequestionFormCategory, { nullable: true })
   requestForm_category: RequestionFormCategory;
   @Field(() => String, { nullable: true })
-  company_id: string;
+  company_id: string | null;
   @Field(() => Company, { nullable: true })
   company: Company;
   @Field(() => [Note], { nullable: true })

@@ -267,9 +267,9 @@ type Query {
   users: [User!]!
   user(email: String!): User!
   userId(userId: String!): User!
-  companies(currentUserId: String!): [Company!]!
+  companies: [Company!]!
   company(id: String!): Company!
-  departments(currentUserId: String!): [Department!]!
+  departments: [Department!]!
   department(id: String!): Department!
   roles: [Role!]!
   role(id: String!): Role!
@@ -293,6 +293,7 @@ type Query {
   checkOutRequestForms: [CheckOutRequestForm!]!
   checkOutRequestForm(id: String!): CheckOutRequestForm!
   requestForms: [RequestForm!]!
+  viewByRole(id: String!): [RequestForm!]!
   requestForm(id: String!): RequestForm!
   item(id: String!): Item!
 }
@@ -808,7 +809,7 @@ input UpdateItemInput {
 
 type Subscription {
   userCreated: User!
-  companyAdded: Company!
+  companyAdded: Item!
   departmentAdded: Department!
   roleCreated: Role!
   requestionFormCategoryCreated: RequestionFormCategory!
