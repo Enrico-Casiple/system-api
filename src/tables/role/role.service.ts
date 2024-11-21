@@ -4,7 +4,7 @@ import { UpdateRoleInput } from './dto/update-role.input';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { UserAccountService } from '../user-account/user-account.service';
-import { MODULE, VIEW_SCOPE } from '@prisma/client';
+import { MODULE } from '@prisma/client';
 
 @Injectable()
 export class RoleService {
@@ -28,7 +28,7 @@ export class RoleService {
                   edit: permission.edit || false,
                   delete: permission.delete || false,
                   verify: permission.verify || false,
-                  scope: permission.scope || VIEW_SCOPE.OWN,
+                  role_id: permission.role_id || undefined,
                 };
               }),
             },
@@ -142,7 +142,6 @@ export class RoleService {
                   edit: permission.edit,
                   delete: permission.delete,
                   verify: permission.verify,
-                  scope: permission.scope,
                 },
               };
             }),
@@ -205,11 +204,10 @@ export class RoleService {
       );
       throw new InternalServerErrorException('User has no role');
     }
-    const permission = find_user_account.role.map((role) => {
-      return role.permissions.find((permission) => {
-        return permission.module === module && permission.view === true;
-      });
+    const permission = find_user_account.role.permissions.map((permission) => { 
+      return permission.module === module && permission.view === true;
     });
+
     if (!permission) {
       this.logger.error(
         'User has no view permission',
@@ -232,10 +230,8 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.map((role) => {
-        return role.permissions.find((permission) => {
-          return permission.module === module && permission.add === true;
-        });
+      const permission = find_user_account.role.permissions.map((permission) => { 
+        return permission.module === module && permission.add === true;
       });
 
       if (!permission) {
@@ -268,10 +264,8 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.map((role) => {
-        return role.permissions.find((permission) => {
-          return permission.module === module && permission.edit === true;
-        });
+      const permission = find_user_account.role.permissions.map((permission) => { 
+        return permission.module === module && permission.edit === true;
       });
 
       if (!permission) {
@@ -304,10 +298,8 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.map((role) => {
-        return role.permissions.find((permission) => {
-          return permission.module === module && permission.delete === true;
-        });
+      const permission = find_user_account.role.permissions.map((permission) => { 
+        return permission.module === module && permission.delete === true;
       });
 
       if (!permission) {

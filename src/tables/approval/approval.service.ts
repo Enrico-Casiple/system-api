@@ -41,11 +41,6 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
-              item_category: {
-                include: {
-                  user_approval: true,
-                },
-              },
             },
           },
         },
@@ -67,7 +62,6 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
-              item_category: true,
             },
           },
           requestion_forms: true,
@@ -102,7 +96,6 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
-              item_category: true,
             },
           },
           requestion_forms: true,
@@ -157,7 +150,6 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
-              item_category: true,
             },
           },
           requestion_forms: true,
@@ -185,7 +177,6 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
-              item_category: true,
             },
           },
           requestion_forms: true,

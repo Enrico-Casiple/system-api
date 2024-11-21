@@ -2,7 +2,6 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import {
   Role as PrismaRole,
   Permission as PrismaPermission,
-  VIEW_SCOPE,
   MODULE,
 } from '@prisma/client';
 import { UserAccount } from 'src/tables/user-account/entities/user-account.entity';
@@ -22,11 +21,6 @@ export class Role implements PrismaRole {
     nullable: true,
   })
   permissions: Permission[];
-
-  @Field(() => [String], {
-    nullable: true,
-  })
-  user_account_id: string[] | null;
 
   @Field(() => [UserAccount], {
     nullable: true,
@@ -74,18 +68,14 @@ export class Permission implements PrismaPermission {
     nullable: true,
   })
   verify: boolean;
-  @Field(() => Boolean, {
+  @Field(() => String, {
     nullable: true,
   })
-  role_id: string;
+  role_id: string | null;
   @Field(() => Role, {
     nullable: true,
   })
   role: Role;
-  @Field(() => String, {
-    nullable: true,
-  })
-  scope: VIEW_SCOPE;
   @Field(() => Date, {
     nullable: true,
   })

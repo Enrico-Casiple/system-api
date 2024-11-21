@@ -5,7 +5,6 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { UserAccountService } from '../user-account/user-account.service';
 import { RoleService } from '../role/role.service';
-import { VIEW_SCOPE } from '@prisma/client';
 
 @Injectable()
 export class DepartmentService {
@@ -75,25 +74,8 @@ export class DepartmentService {
   }
 
   async findAllByRolePermission(currentUserId: string) {
-    // await this.userAccountService.findOne(currentUserId);
-    const checkView = await this.roleService.checkViewPermission(
-      currentUserId,
-      'DEPARTMENT_MANAGEMENT',
-    );
-    const scope = checkView.map((view) => view.scope);
     try {
-      switch (scope[0]) {
-        case VIEW_SCOPE.ALL:
-          return await this.findAll();
-        case VIEW_SCOPE.COMPANY || VIEW_SCOPE.DEPARTMENT || VIEW_SCOPE.OWN:
-          return await this.findByUserDepartment(currentUserId);
-        default:
-          this.loggerService.error(
-            `You have no permission`,
-            'DepartmentService.findAll()',
-          );
-          throw new InternalServerErrorException(`You have no permission`);
-      }
+      return await this.findAll();
     } catch (error) {
       this.loggerService.error(
         error.message,

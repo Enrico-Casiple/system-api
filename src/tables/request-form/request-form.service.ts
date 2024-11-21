@@ -23,8 +23,6 @@ export class RequestFormService {
     try {
       const create = await this.prismaService.requestionForm.create({
         data: {
-          name: createRequestFormInput.name,
-          description: createRequestFormInput.description,
           user_id: createRequestFormInput.user_id,
           items:
             createRequestFormInput.items.length > 0
@@ -67,11 +65,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -121,11 +114,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -181,11 +169,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -245,11 +228,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -303,11 +281,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -363,11 +336,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -394,56 +362,56 @@ export class RequestFormService {
     }
   }
 
-  async viewByRole(userId: string) {
-    await this.userAccountService.findUserOne(userId);
-    const checkView = await this.roleService.checkViewPermission(
-      userId,
-      'REQUESTION_MANAGEMENT',
-    );
-    if (!checkView) {
-      this.logger.error(
-        'User does not have permission to view request form',
-        'RequestFormService.viewByRole()',
-      );
-      throw new BadRequestException(
-        'User does not have permission to view request form',
-      );
-    }
-    const scope = checkView.map((view) => view.scope);
-    try {
-      const result = await Promise.all(scope.map(async (scope) => {
-        switch (scope) {
-          case 'ALL':
-            return await this.findAll();
-          case 'DEPARTMENT':
-            return await this.findByDepartment(userId);
-          case 'COMPANY':
-            return await this.findByCompany(userId);
-          case 'NON_FOOD':
-            return await this.findByRequestCategory(userId);
-          case 'FOOD':
-            return await this.findByRequestCategory(userId);
-          case 'GSD':
-            return await this.findByRequestCategory(userId);
-          default:
-            return await this.findByUserId(userId);
-        }
-      }));
-    const flattenedResult = result.flat();
-    const uniqueResult = Array.from(new Set(flattenedResult.map(item => item.id)))
-      .map(id => flattenedResult.find(item => item.id === id));
-    return uniqueResult;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.viewByRole()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching requestForm: ${error.message}`,
-      );
-    }
-  }
+  // async viewByRole(userId: string) {
+  //   await this.userAccountService.findUserOne(userId);
+  //   const checkView = await this.roleService.checkViewPermission(
+  //     userId,
+  //     'REQUESTION_MANAGEMENT',
+  //   );
+  //   if (!checkView) {
+  //     this.logger.error(
+  //       'User does not have permission to view request form',
+  //       'RequestFormService.viewByRole()',
+  //     );
+  //     throw new BadRequestException(
+  //       'User does not have permission to view request form',
+  //     );
+  //   }
+  //   const scope = checkView.map((view) => view.scope);
+  //   try {
+  //     const result = await Promise.all(scope.map(async (scope) => {
+  //       switch (scope) {
+  //         case 'ALL':
+  //           return await this.findAll();
+  //         case 'DEPARTMENT':
+  //           return await this.findByDepartment(userId);
+  //         case 'COMPANY':
+  //           return await this.findByCompany(userId);
+  //         case 'NON_FOOD':
+  //           return await this.findByRequestCategory(userId);
+  //         case 'FOOD':
+  //           return await this.findByRequestCategory(userId);
+  //         case 'GSD':
+  //           return await this.findByRequestCategory(userId);
+  //         default:
+  //           return await this.findByUserId(userId);
+  //       }
+  //     }));
+  //   const flattenedResult = result.flat();
+  //   const uniqueResult = Array.from(new Set(flattenedResult.map(item => item.id)))
+  //     .map(id => flattenedResult.find(item => item.id === id));
+  //   return uniqueResult;
+  //   } catch (error) {
+  //     this.logger.error(
+  //       error.message,
+  //       error.stack,
+  //       'RequestFormService.viewByRole()',
+  //     );
+  //     throw new InternalServerErrorException(
+  //       `Error occurred while fetching requestForm: ${error.message}`,
+  //     );
+  //   }
+  // }
 
   async findOne(id: string) {
     try {
@@ -474,11 +442,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -522,8 +485,6 @@ export class RequestFormService {
       const update = await this.prismaService.requestionForm.update({
         where: { id },
         data: {
-          name: updateRequestFormInput.name,
-          description: updateRequestFormInput.description,
           user_id: updateRequestFormInput.user_id,
           items:
             updateRequestFormInput.items.length > 0
@@ -623,11 +584,6 @@ export class RequestFormService {
               user_approval: {
                 include: {
                   approver: true,
-                  item_category: {
-                    include: {
-                      user_approval: true,
-                    },
-                  },
                 },
               },
             },
@@ -672,4 +628,6 @@ export class RequestFormService {
       );
     }
   }
+
+  
 }

@@ -70,7 +70,6 @@ type Role {
   id: String
   name: String
   permissions: [Permission!]
-  user_account_id: [String!]
   user_account: [UserAccount!]
   created_at: DateTime
   updated_at: DateTime
@@ -84,9 +83,8 @@ type Permission {
   edit: Boolean
   delete: Boolean
   verify: Boolean
-  role_id: Boolean
+  role_id: String
   role: Role
-  scope: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -111,8 +109,8 @@ type UserAccount {
   password: String
   user: User
   user_id: String
-  role: [Role!]
-  role_id: [String!]
+  role: Role
+  role_id: String
   sessions: Session
   notes: [Note!]
   type: String
@@ -430,7 +428,7 @@ input CreateUserAccountInput {
   user_id: String
   user: CreateUserInput
   role: CreateRoleInput
-  role_id: [String!]
+  role_id: String
   sessions: CreateSessionInput
   notes: [CreateNoteInput!]
   type: String
@@ -451,7 +449,6 @@ input CreateRoleInput {
   id: String
   name: String
   permissions: [CreatePermissionInput!]
-  user_account_id: [String!]
   user_account: [CreateUserAccountInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -467,7 +464,6 @@ input CreatePermissionInput {
   verify: Boolean
   role_id: String
   role: CreateRoleInput
-  scope: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -550,7 +546,6 @@ input UpdateRoleInput {
   id: String
   name: String
   permissions: [CreatePermissionInput!]
-  user_account_id: [String!]
   user_account: [CreateUserAccountInput!]
   created_at: DateTime
   updated_at: DateTime
@@ -605,8 +600,6 @@ input CreateRequestionFormCategoryInput {
 
 input CreateRequestFormInput {
   id: String
-  name: String
-  description: String
   user_id: String
   requester: CreateUserInput
   items: [CreateItemInput!]
@@ -773,8 +766,6 @@ input UpdateCheckOutRequestFormInput {
 
 input UpdateRequestFormInput {
   id: String
-  name: String
-  description: String
   user_id: String
   requester: CreateUserInput
   items: [CreateItemInput!]

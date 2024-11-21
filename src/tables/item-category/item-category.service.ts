@@ -16,11 +16,8 @@ export class ItemCategoryService {
         data: {
           name: createItemCategoryInput.name,
           description: createItemCategoryInput.description,
-          user_approval_id: createItemCategoryInput.user_approval_id,
         },
         include: {
-          user_approval: true,
-          approvalUser: true,
           items: true,
         },
       });
@@ -42,9 +39,7 @@ export class ItemCategoryService {
     try {
       const itemCategories = await this.prismaService.itemCategory.findMany({
         include: {
-          approvalUser: true,
           items: true,
-          user_approval: true,
         },
       });
       return itemCategories;
@@ -59,7 +54,7 @@ export class ItemCategoryService {
       );
     }
   }
-
+  
   async findOne(id: string) {
     // Check if the id Is MongoObjectId
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -71,9 +66,7 @@ export class ItemCategoryService {
       const itemCategory = await this.prismaService.itemCategory.findUnique({
         where: { id },
         include: {
-          approvalUser: true,
           items: true,
-          user_approval: true,
         },
       });
 
@@ -106,12 +99,9 @@ export class ItemCategoryService {
         data: {
           name: updateItemCategoryInput.name,
           description: updateItemCategoryInput.description,
-          user_approval_id: updateItemCategoryInput.user_approval_id,
         },
         include: {
-          approvalUser: true,
           items: true,
-          user_approval: true,
         },
       });
       return update;

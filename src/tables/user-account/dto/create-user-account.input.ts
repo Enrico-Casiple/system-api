@@ -39,10 +39,10 @@ export class CreateUserAccountInput implements User_Account {
     nullable: true,
   })
   role: CreateRoleInput;
-  @Field(() => [String], {
+  @Field(() => String, {
     nullable: true,
   })
-  role_id: string[] | null;
+  role_id: string | null;
   @Field(() => CreateSessionInput, {
     nullable: true,
   })

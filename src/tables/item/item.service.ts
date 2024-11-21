@@ -11,8 +11,20 @@ export class ItemService {
     private readonly logger: LoggersService,
 
   ) {}
-  create(createItemInput: CreateItemInput) {
-    return 'This action adds a new item';
+  async create(createItemInput: CreateItemInput) {
+    try {
+      const item = await this.primsaService.item.create({
+        data: {
+          ...createItemInput,
+        },
+      });
+      return item;
+    } catch (error) {
+      this.logger.error(error.message, error.stack, 'ItemService.create()');
+      throw new InternalServerErrorException(
+        `Error occurred while creating item: ${error.message}`,
+      );
+    }
   }
 
   async findAll() {
@@ -38,8 +50,24 @@ export class ItemService {
     return `This action returns a #${id} item`;
   }
 
-  update(id: string, updateItemInput: UpdateItemInput) {
-    return `This action updates a #${id} item`;
+  async update(id: string, updateItemInput: UpdateItemInput) {
+    try {
+      const item = await this.primsaService.item.update({
+        where: {
+          id: id,
+        },
+        data: {
+          ...updateItemInput,
+        },
+      });
+      return item;
+    } catch (error) {
+      this.logger.error(error.message, error.stack, 'ItemService.update()');
+      throw new InternalServerErrorException(
+        `Error occurred while updating item: ${error.message}`,
+      );
+      
+    }
   }
 
   remove(id: string) {

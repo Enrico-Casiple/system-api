@@ -16,16 +16,10 @@ export class ApprovalUserService {
         data: {
           level: createApprovalUserInput.level,
           approver_id: createApprovalUserInput.approver_id,
-          item_category_id: createApprovalUserInput.item_category_id,
           approval_id: createApprovalUserInput.approval_id,
         },
         include: {
           approver: true,
-          item_category: {
-            include: {
-              user_approval: true,
-            },
-          },
           approval: true,
         },
       });
@@ -49,7 +43,6 @@ export class ApprovalUserService {
       const approvalUsers = await this.prismaService.approvalUser.findMany({
         include: {
           approver: true,
-          item_category: true,
           approval: true,
         },
       });
@@ -78,7 +71,6 @@ export class ApprovalUserService {
         where: { id },
         include: {
           approver: true,
-          item_category: true,
           approval: true,
         },
       });
@@ -113,12 +105,10 @@ export class ApprovalUserService {
         data: {
           level: updateApprovalUserInput.level,
           approver_id: updateApprovalUserInput.approver_id,
-          item_category_id: updateApprovalUserInput.item_category_id,
           approval_id: updateApprovalUserInput.approval_id,
         },
         include: {
           approver: true,
-          item_category: true,
           approval: true,
         },
       });

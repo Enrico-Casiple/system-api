@@ -13,7 +13,9 @@ export class ItemResolver {
 
   @Mutation(() => Item)
   createItem(@Args('createItemInput') createItemInput: CreateItemInput) {
-    return this.itemService.create(createItemInput);
+    const createItem = this.itemService.create(createItemInput);
+    pubSub.publish('companyAdded', { companyAdded: createItem });
+    return createItem;
   }
 
   @Query(() => [Item], { name: 'items' })
@@ -28,7 +30,9 @@ export class ItemResolver {
 
   @Mutation(() => Item)
   updateItem(@Args('updateItemInput') updateItemInput: UpdateItemInput) {
-    return this.itemService.update(updateItemInput.id, updateItemInput);
+    const updateItem = this.itemService.update(updateItemInput.id, updateItemInput);
+    pubSub.publish('companyAdded', { companyAdded: updateItem });
+    return updateItem;
   }
 
   @Mutation(() => Item)

@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { MODULE, Permission, Role, VIEW_SCOPE } from '@prisma/client';
+import { MODULE, Permission, Role } from '@prisma/client';
 import { CreateUserAccountInput } from 'src/tables/user-account/dto/create-user-account.input';
 
 @InputType()
@@ -17,11 +17,6 @@ export class CreateRoleInput implements Role {
     nullable: true,
   })
   permissions: CreatePermissionInput[];
-
-  @Field(() => [String], {
-    nullable: true,
-  })
-  user_account_id: string[] | null;
 
   @Field(() => [CreateUserAccountInput], {
     nullable: true,
@@ -77,10 +72,6 @@ export class CreatePermissionInput implements Permission {
     nullable: true,
   })
   role: CreateRoleInput;
-  @Field(() => String, {
-    nullable: true,
-  })
-  scope: VIEW_SCOPE;
   @Field(() => Date, {
     nullable: true,
   })

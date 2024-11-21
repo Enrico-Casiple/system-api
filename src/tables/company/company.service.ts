@@ -5,7 +5,6 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { RoleService } from '../role/role.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { UserAccountService } from '../user-account/user-account.service';
-import { VIEW_SCOPE } from '@prisma/client';
 
 @Injectable()
 export class CompanyService {
@@ -19,10 +18,7 @@ export class CompanyService {
     const find_user_account =
       await this.userAccountService.findOne(currentUserId);
 
-    await this.roleService.checkAddPermission(
-      find_user_account.id,
-      'COMPANY_MANAGEMENT',
-    );
+
     try {
       const create_company = await this.prisma.company.create({
         data: {
@@ -63,24 +59,9 @@ export class CompanyService {
   }
 
   async findAllByRolePermission(currentUserId: string) {
-    const checkView = await this.roleService.checkViewPermission(
-      currentUserId,
-      'COMPANY_MANAGEMENT',
-    );
-    const scope = checkView.map((view) => view.scope);
+
     try {
-      switch (scope[0]) {
-        case VIEW_SCOPE.ALL:
-          return await this.findAll();
-        case VIEW_SCOPE.COMPANY || VIEW_SCOPE.DEPARTMENT || VIEW_SCOPE.OWN:
-          return await this.findByUserCompany(currentUserId);
-        default:
-          this.logger.error(
-            `You have no permission`,
-            'CompanyService.findAll()',
-          );
-          throw new InternalServerErrorException(`You have no permission`);
-      }
+      return await this.findAll();
     } catch (error) {
       this.logger.error(error.message, error.stack, 'CompanyService.findAll()');
       throw new InternalServerErrorException(
@@ -169,10 +150,7 @@ export class CompanyService {
   ) {
     const find_user_account =
       await this.userAccountService.findOne(currentUserId);
-    await this.roleService.checkEditPermission(
-      find_user_account.id,
-      'COMPANY_MANAGEMENT',
-    );
+  
     try {
       await this.findOne(id);
       const updateCompany = await this.prisma.company.update({

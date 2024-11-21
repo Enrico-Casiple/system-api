@@ -9,6 +9,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { POSITION } from '@prisma/client';
 import { UtilityService } from 'src/common/utility/utility.service';
+import { permission } from 'process';
 
 @Injectable()
 export class UserService {
@@ -67,7 +68,7 @@ export class UserService {
               password: await this.utilityService.hashPassword(
                 createUserInput.user_account.password,
               ),
-              role_id: createUserInput.user_account.role_id,
+              role_id: createUserInput.user_account.role_id || undefined,
             },
           },
         },
@@ -123,7 +124,28 @@ export class UserService {
     try {
       const users = await this.prismaService.user.findMany({
         include: {
-          user_account: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
 
@@ -162,9 +184,28 @@ export class UserService {
           ],
         },
         include: {
-          user_account: true,
-          companies: true,
-          departments: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
 
@@ -194,9 +235,28 @@ export class UserService {
           id: id,
         },
         include: {
-          user_account: true,
-          companies: true,
-          departments: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
 
@@ -221,7 +281,28 @@ export class UserService {
           email,
         },
         include: {
-          user_account: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
 
@@ -294,7 +375,28 @@ export class UserService {
           },
         },
         include: {
-          user_account: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
 
@@ -320,12 +422,30 @@ export class UserService {
           id: id,
         },
         include: {
-          user_account: true,
-          companies: true,
-          departments: true,
+          companies: {
+            include: {
+              company: true
+            },
+          },
+          departments: {
+            include: {
+              department: true
+            },
+          },
+          user_account: {
+            include: {
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+            }
+          },
+          company_president: true,
+          department_manager: true,
+          department_supervisor: true,
         },
       });
-
       return delete_user;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'UserService.remove()');

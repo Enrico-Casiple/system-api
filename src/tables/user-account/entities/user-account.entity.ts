@@ -31,14 +31,14 @@ export class UserAccount implements User_Account {
     nullable: true,
   })
   user_id: string | null;
-  @Field(() => [Role], {
+  @Field(() => Role, {
     nullable: true,
   })
   role: Role[];
-  @Field(() => [String], {
+  @Field(() => String, {
     nullable: true,
   })
-  role_id: string[] | null;
+  role_id: string | null;
   @Field(() => Session, {
     nullable: true,
   })
