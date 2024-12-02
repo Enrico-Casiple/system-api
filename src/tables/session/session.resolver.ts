@@ -15,7 +15,7 @@ export class SessionResolver {
     return this.sessionService.create(createSessionInput);
   }
 
-  @Query(() => [Session], { name: 'session' })
+  @Query(() => [Session], { name: 'sessions' })
   findAll() {
     return this.sessionService.findAll();
   }
@@ -40,3 +40,4 @@ export class SessionResolver {
     return this.sessionService.remove(id);
   }
 }
+

@@ -12,13 +12,9 @@ export class DepartmentResolver {
 
   @Mutation(() => Department)
   createDepartment(
-    @Args('currentUserId') currentUserId: string,
     @Args('createDepartmentInput') createDepartmentInput: CreateDepartmentInput,
   ) {
-    const department = this.departmentService.create(
-      createDepartmentInput,
-      currentUserId,
-    );
+    const department = this.departmentService.create(createDepartmentInput);
     pubSub.publish('departmentAdded', { departmentAdded: department });
     return department;
   }
@@ -35,24 +31,19 @@ export class DepartmentResolver {
 
   @Mutation(() => Department)
   updateDepartment(
-    @Args('currentUserId') currentUserId: string,
     @Args('updateDepartmentInput') updateDepartmentInput: UpdateDepartmentInput,
   ) {
     const department = this.departmentService.update(
       updateDepartmentInput.id,
       updateDepartmentInput,
-      currentUserId,
     );
     pubSub.publish('departmentAdded', { departmentAdded: department });
     return department;
   }
 
   @Mutation(() => Department)
-  removeDepartment(
-    @Args('currentUserId') currentUserId: string,
-    @Args('id', { type: () => String }) id: string,
-  ) {
-    const department = this.departmentService.remove(id, currentUserId);
+  removeDepartment(@Args('id', { type: () => String }) id: string) {
+    const department = this.departmentService.remove(id);
     pubSub.publish('departmentAdded', { departmentAdded: department });
     return department;
   }

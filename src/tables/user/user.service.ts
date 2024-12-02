@@ -68,7 +68,7 @@ export class UserService {
               password: await this.utilityService.hashPassword(
                 createUserInput.user_account.password,
               ),
-              role_id: createUserInput.user_account.role_id || undefined,
+              role_id: createUserInput.user_account.role_id || null,
             },
           },
         },
@@ -370,19 +370,19 @@ export class UserService {
               username:
                 updateUserInput.user_account.username ||
                 updateUserInput.email.split('@')[0],
-              role_id: updateUserInput.user_account.role_id,
+              role_id: updateUserInput.user_account.role_id || null,
             },
           },
         },
         include: {
           companies: {
             include: {
-              company: true
+              company: true,
             },
           },
           departments: {
             include: {
-              department: true
+              department: true,
             },
           },
           user_account: {
@@ -392,7 +392,7 @@ export class UserService {
                   permissions: true,
                 },
               },
-            }
+            },
           },
           company_president: true,
           department_manager: true,

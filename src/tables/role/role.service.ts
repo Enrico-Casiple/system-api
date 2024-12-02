@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { MODULE } from '@prisma/client';
+import { LoggersService } from 'src/common/log/log.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { UserAccountService } from '../user-account/user-account.service';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-import { LoggersService } from 'src/common/log/log.service';
-import { UserAccountService } from '../user-account/user-account.service';
-import { MODULE } from '@prisma/client';
 
 @Injectable()
 export class RoleService {
@@ -23,12 +23,12 @@ export class RoleService {
               data: createRoleInput.permissions.map((permission) => {
                 return {
                   module: permission.module,
-                  view: permission.view || true,
+                  view: permission.view || false,
                   add: permission.add || false,
                   edit: permission.edit || false,
                   delete: permission.delete || false,
                   verify: permission.verify || false,
-                  role_id: permission.role_id || undefined,
+                  approver: permission.approver || false,
                 };
               }),
             },
@@ -65,7 +65,7 @@ export class RoleService {
     }
   }
 
-  async findByAccountId(id: string) { 
+  async findByAccountId(id: string) {
     try {
       const allRoles = await this.prismaService.role.findMany({
         where: {
@@ -73,7 +73,7 @@ export class RoleService {
             some: {
               id: id,
             },
-          }
+          },
         },
         include: {
           permissions: true,
@@ -83,7 +83,11 @@ export class RoleService {
 
       return allRoles;
     } catch (error) {
-      this.logger.error(error.message, error.stack, 'RoleService.findByAccountId()');
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RoleService.findByAccountId()',
+      );
       throw new InternalServerErrorException(
         `Error occurred while fetching users: ${error.message}`,
       );
@@ -130,21 +134,22 @@ export class RoleService {
         data: {
           name: updateRoleInput.name,
           permissions: {
-            updateMany: updateRoleInput.permissions.map((permission) => {
-              return {
-                where: {
-                  role_id: id,
+            deleteMany: {
+              role_id: id,
+            },
+            createMany: {
+              data: updateRoleInput.permissions.map((permission) => {
+                return {
                   module: permission.module,
-                },
-                data: {
-                  view: permission.view,
-                  add: permission.add,
-                  edit: permission.edit,
-                  delete: permission.delete,
-                  verify: permission.verify,
-                },
-              };
-            }),
+                  view: permission.view || false,
+                  add: permission.add || false,
+                  edit: permission.edit || false,
+                  delete: permission.delete || false,
+                  verify: permission.verify || false,
+                  approver: permission.approver || false,
+                };
+              }),
+            },
           },
         },
         include: {
@@ -204,7 +209,7 @@ export class RoleService {
       );
       throw new InternalServerErrorException('User has no role');
     }
-    const permission = find_user_account.role.permissions.map((permission) => { 
+    const permission = find_user_account.role.permissions.map((permission) => {
       return permission.module === module && permission.view === true;
     });
 
@@ -230,9 +235,11 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.permissions.map((permission) => { 
-        return permission.module === module && permission.add === true;
-      });
+      const permission = find_user_account.role.permissions.map(
+        (permission) => {
+          return permission.module === module && permission.add === true;
+        },
+      );
 
       if (!permission) {
         this.logger.error(
@@ -264,9 +271,11 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.permissions.map((permission) => { 
-        return permission.module === module && permission.edit === true;
-      });
+      const permission = find_user_account.role.permissions.map(
+        (permission) => {
+          return permission.module === module && permission.edit === true;
+        },
+      );
 
       if (!permission) {
         this.logger.error(
@@ -298,9 +307,11 @@ export class RoleService {
         throw new InternalServerErrorException('User has no role');
       }
 
-      const permission = find_user_account.role.permissions.map((permission) => { 
-        return permission.module === module && permission.delete === true;
-      });
+      const permission = find_user_account.role.permissions.map(
+        (permission) => {
+          return permission.module === module && permission.delete === true;
+        },
+      );
 
       if (!permission) {
         this.logger.error(

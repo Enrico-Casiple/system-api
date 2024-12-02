@@ -12,13 +12,9 @@ export class CompanyResolver {
 
   @Mutation(() => Company)
   createCompany(
-    @Args('currentUserId') currentUserId: string,
     @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
   ) {
-    const company = this.companyService.create(
-      createCompanyInput,
-      currentUserId,
-    );
+    const company = this.companyService.create(createCompanyInput);
 
     pubSub.publish('companyAdded', { companyAdded: company });
 
@@ -37,13 +33,11 @@ export class CompanyResolver {
 
   @Mutation(() => Company)
   updateCompany(
-    @Args('currentUserId') currentUserId: string,
     @Args('updateCompanyInput') updateCompanyInput: UpdateCompanyInput,
   ) {
     const company = this.companyService.update(
       updateCompanyInput.id,
       updateCompanyInput,
-      currentUserId,
     );
 
     pubSub.publish('companyAdded', { companyAdded: company });
@@ -52,11 +46,8 @@ export class CompanyResolver {
   }
 
   @Mutation(() => Company)
-  removeCompany(
-    @Args('currentUserId') currentUserId: string,
-    @Args('id', { type: () => String }) id: string,
-  ) {
-    const company = this.companyService.remove(id, currentUserId);
+  removeCompany(@Args('id', { type: () => String }) id: string) {
+    const company = this.companyService.remove(id);
 
     pubSub.publish('companyAdded', { companyAdded: company });
 

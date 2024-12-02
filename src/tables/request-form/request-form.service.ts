@@ -3,27 +3,31 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { APPROVAL_STATUS, APPROVER_TYPE, POSITION } from '@prisma/client';
+import { CounterService } from 'src/common/counter/counter.service';
+import { LoggersService } from 'src/common/log/log.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-import { LoggersService } from 'src/common/log/log.service';
-import {  MODULE, REQUESTION_STATUS } from '@prisma/client';
-import { UserAccountService } from '../user-account/user-account.service';
-import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class RequestFormService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly logger: LoggersService,
-    private readonly userAccountService: UserAccountService,
-    private readonly roleService: RoleService,
+    private readonly counter: CounterService,
   ) {}
+
   async create(createRequestFormInput: CreateRequestFormInput) {
     try {
       const create = await this.prismaService.requestionForm.create({
         data: {
+          purchase_number: await this.counter.getCounter('PURCHASE_NUMBER'),
           user_id: createRequestFormInput.user_id,
+          company_id: createRequestFormInput.company_id,
+          status: createRequestFormInput.status || 'PENDING',
+          isVerified: false,
+          approval_id: createRequestFormInput.approval_id || undefined,
           items:
             createRequestFormInput.items.length > 0
               ? {
@@ -33,38 +37,38 @@ export class RequestFormService {
                         name: item.name,
                         description: item.description,
                         quantity: item.quantity,
-                        price: item.price,
-                        total_price: item.quantity * item.price,
-                        unit_of_measurement_id: item.unit_of_measurement_id,
-                        item_category_id: item.item_category_id,
-                        supplier_id: item.supplier_id,
-                        item_status: item.item_status,
+                        unit_of_measurement: item.unit_of_measurement,
+                        item_category: item.item_category,
+                        item_status: item.item_status || 'PENDING',
                       };
                     }),
                   },
                 }
               : undefined,
-          approval_id: createRequestFormInput.approval_id,
-          status: createRequestFormInput.status,
-          requestForm_category_id:
-            createRequestFormInput.requestForm_category_id,
-          company_id: createRequestFormInput.company_id,
-          isVerified: createRequestFormInput.isVerified,
         },
         include: {
-          requester: true,
-          items: {
+          requester: {
             include: {
-              unit_of_measurement: true,
-              item_category: true,
-              supplier: true,
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
             },
+          },
+          items: {
+            include: {},
           },
           approval: {
             include: {
               user_approval: {
                 include: {
                   approver: true,
+                  item_category: true,
                 },
               },
             },
@@ -74,9 +78,22 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
-          company: true,
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
         },
       });
+
       return create;
     } catch (error) {
       this.logger.error(
@@ -92,28 +109,30 @@ export class RequestFormService {
 
   async findAll() {
     try {
-      const requestForm = await this.prismaService.requestionForm.findMany({
+      const requestForms = await this.prismaService.requestionForm.findMany({
         include: {
           requester: {
             include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
               departments: {
                 include: {
-                  department: true,
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
                 },
               },
             },
           },
-          items: true,
+          items: {
+            include: {},
+          },
           approval: {
             include: {
               user_approval: {
                 include: {
                   approver: true,
+                  item_category: true,
                 },
               },
             },
@@ -123,11 +142,23 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
-          notes: true,
-          company: true,
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
         },
       });
-      return requestForm;
+
+      return requestForms;
     } catch (error) {
       this.logger.error(
         error.message,
@@ -135,313 +166,40 @@ export class RequestFormService {
         'RequestFormService.findAll()',
       );
       throw new InternalServerErrorException(
-        `Error occurred while fetching requestForm: ${error.message}`,
+        `Error occurred while fetching requestForms: ${error.message}`,
       );
     }
   }
-
-  async findByCompany(userId: string) {
-    try {
-      const requestByCompany = await this.prismaService.requestionForm.findMany({
-        where: {
-          company: {
-            president_id: userId,
-          },
-        },
-          include: {
-          requester: {
-            include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
-              departments: {
-                include: {
-                  department: true,
-                },
-              },
-            },
-          },
-          items: true,
-          approval: {
-            include: {
-              user_approval: {
-                include: {
-                  approver: true,
-                },
-              },
-            },
-          },
-          requestForm_category: {
-            include: {
-              user_verifier: true,
-            },
-          },
-          notes: true,
-          company: true,
-        },
-      });
-      return requestByCompany;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.findByCompanyId()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching findByCompanyId: ${error.message}`,
-      );
-    }
-  }
-
-  async findByDepartment(userId: string) {
-    try {
-      const requestByDepartment = await this.prismaService.requestionForm.findMany({
-        where: {
-          company: {
-            departments: {
-              some: {
-                manager_id: userId,
-              },
-            },
-          },
-        },
-          include: {
-          requester: {
-            include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
-              departments: {
-                include: {
-                  department: true,
-                },
-              },
-            },
-          },
-          items: true,
-          approval: {
-            include: {
-              user_approval: {
-                include: {
-                  approver: true,
-                },
-              },
-            },
-          },
-          requestForm_category: {
-            include: {
-              user_verifier: true,
-            },
-          },
-          notes: true,
-          company: true,
-        },
-      });
-      return requestByDepartment;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.findByDepartmentId()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching findByDepartmentId: ${error.message}`,
-      );
-    }
-  }
-
-  async findByUserId(userId: string) {
-    try {
-      const requestOwn = await this.prismaService.requestionForm.findMany({
-        where: {
-          user_id: userId,
-        },
-          include: {
-          requester: {
-            include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
-              departments: {
-                include: {
-                  department: true,
-                },
-              },
-            },
-          },
-          items: true,
-          approval: {
-            include: {
-              user_approval: {
-                include: {
-                  approver: true,
-                },
-              },
-            },
-          },
-          requestForm_category: {
-            include: {
-              user_verifier: true,
-            },
-          },
-          notes: true,
-          company: true,
-        },
-      });
-      return requestOwn;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.findByUserId()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching findByUserId: ${error.message}`,
-      );
-    }
-  }
-
-  async findByRequestCategory(userId: string) {
-    try {
-      const requestCategoryVerfier = await this.prismaService.requestionForm.findMany({
-        where: {
-          requestForm_category: {
-            user_verifier_id: userId,
-          },
-        },
-          include: {
-          requester: {
-            include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
-              departments: {
-                include: {
-                  department: true,
-                },
-              },
-            },
-          },
-          items: true,
-          approval: {
-            include: {
-              user_approval: {
-                include: {
-                  approver: true,
-                },
-              },
-            },
-          },
-          requestForm_category: {
-            include: {
-              user_verifier: true,
-            },
-          },
-          notes: true,
-          company: true,
-        },
-      });
-      return requestCategoryVerfier;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.findByRequestCategory()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while fetching findByRequestCategory: ${error.message}`,
-      );
-    }
-  }
-
-  // async viewByRole(userId: string) {
-  //   await this.userAccountService.findUserOne(userId);
-  //   const checkView = await this.roleService.checkViewPermission(
-  //     userId,
-  //     'REQUESTION_MANAGEMENT',
-  //   );
-  //   if (!checkView) {
-  //     this.logger.error(
-  //       'User does not have permission to view request form',
-  //       'RequestFormService.viewByRole()',
-  //     );
-  //     throw new BadRequestException(
-  //       'User does not have permission to view request form',
-  //     );
-  //   }
-  //   const scope = checkView.map((view) => view.scope);
-  //   try {
-  //     const result = await Promise.all(scope.map(async (scope) => {
-  //       switch (scope) {
-  //         case 'ALL':
-  //           return await this.findAll();
-  //         case 'DEPARTMENT':
-  //           return await this.findByDepartment(userId);
-  //         case 'COMPANY':
-  //           return await this.findByCompany(userId);
-  //         case 'NON_FOOD':
-  //           return await this.findByRequestCategory(userId);
-  //         case 'FOOD':
-  //           return await this.findByRequestCategory(userId);
-  //         case 'GSD':
-  //           return await this.findByRequestCategory(userId);
-  //         default:
-  //           return await this.findByUserId(userId);
-  //       }
-  //     }));
-  //   const flattenedResult = result.flat();
-  //   const uniqueResult = Array.from(new Set(flattenedResult.map(item => item.id)))
-  //     .map(id => flattenedResult.find(item => item.id === id));
-  //   return uniqueResult;
-  //   } catch (error) {
-  //     this.logger.error(
-  //       error.message,
-  //       error.stack,
-  //       'RequestFormService.viewByRole()',
-  //     );
-  //     throw new InternalServerErrorException(
-  //       `Error occurred while fetching requestForm: ${error.message}`,
-  //     );
-  //   }
-  // }
 
   async findOne(id: string) {
     try {
-      if (!id.match(/^[0-9a-fA-F]{24}$/) || !id) {
-        this.logger.error('Invalid id', 'RequestFormService.findOne()');
-        throw new BadRequestException('Invalid id');
-      }
       const requestForm = await this.prismaService.requestionForm.findUnique({
-        where: { id },
+        where: {
+          id,
+        },
         include: {
           requester: {
             include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
               departments: {
                 include: {
-                  department: true,
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
                 },
               },
             },
           },
-          items: true,
+          items: {
+            include: {},
+          },
           approval: {
             include: {
               user_approval: {
                 include: {
                   approver: true,
+                  item_category: true,
                 },
               },
             },
@@ -451,18 +209,21 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
-          notes: true,
-          company: true,
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
         },
       });
-
-      if (!requestForm) {
-        this.logger.error(
-          'Request form not found',
-          'RequestFormService.findOne()',
-        );
-        throw new BadRequestException('Request form not found');
-      }
 
       return requestForm;
     } catch (error) {
@@ -479,56 +240,79 @@ export class RequestFormService {
 
   async update(id: string, updateRequestFormInput: UpdateRequestFormInput) {
     try {
-      await this.findOne(id);
-      
-
       const update = await this.prismaService.requestionForm.update({
-        where: { id },
+        where: {
+          id,
+        },
         data: {
-          user_id: updateRequestFormInput.user_id,
-          items:
-            updateRequestFormInput.items.length > 0
-              ? {
-                  deleteMany: {},
-                  createMany: {
-                    data: updateRequestFormInput.items.map((item) => {
-                      return {
-                        name: item.name,
-                        description: item.description,
-                        quantity: item.quantity,
-                        price: item.price,
-                        total_price: item.quantity * item.price,
-                        unit_of_measurement_id: item.unit_of_measurement_id,
-                        item_category_id: item.item_category_id,
-                        supplier_id:
-                          item.supplier_id === '' ? null : item.supplier_id,
-                        item_status: item.item_status,
-                      };
-                    }),
-                  },
-                }
-              : undefined,
-          approval_id:
-            updateRequestFormInput.approval_id === ''
-              ? null
-              : updateRequestFormInput.approval_id,
-          status: updateRequestFormInput.status,
-          requestForm_category_id:
-            updateRequestFormInput.requestForm_category_id,
-          company_id:
-            updateRequestFormInput.company_id === ''
-              ? null
-              : updateRequestFormInput.company_id,
+          approval_id: updateRequestFormInput.approval_id || undefined,
+          company_id: updateRequestFormInput.company_id || undefined,
+          status: updateRequestFormInput.status || 'PENDING',
           isVerified: updateRequestFormInput.isVerified,
+          items: {
+            deleteMany: {},
+            createMany: {
+              data: updateRequestFormInput.items.map((item) => {
+                return {
+                  name: item.name,
+                  description: item.description,
+                  quantity: item.quantity,
+                  unit_of_measurement: item.unit_of_measurement,
+                  item_category: item.item_category,
+                  item_status: item.item_status || 'PENDING',
+                };
+              }),
+            },
+          },
         },
         include: {
-          requester: true,
-          items: true,
-          approval: true,
-          requestForm_category: true,
-          company: true,
+          requester: {
+            include: {
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          items: {
+            include: {},
+          },
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: true,
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
         },
       });
+
       return update;
     } catch (error) {
       this.logger.error(
@@ -542,48 +326,35 @@ export class RequestFormService {
     }
   }
 
-  async updateStatus(id: string, status: REQUESTION_STATUS, remarks: string, isVerified: boolean) { 
+  async remove(id: string) {
     try {
-      const requestStatus = await this.findOne(id);
-      const update = await this.prismaService.requestionForm.update({
-        where: { id },
-        data: {
-          isVerified,
-          status,
-          notes: {
-            create: {
-              name: `Status changed from ${requestStatus.status} to ${status} with remarks:`,
-              description: remarks,
-              logs: `
-                Previous status: ${requestStatus.status}
-                New status: ${status}
-                user: ${requestStatus.requester.email}
-                time: ${new Date().toISOString()}
-              `,
-            },
-          },
+      const remove = await this.prismaService.requestionForm.delete({
+        where: {
+          id,
         },
         include: {
           requester: {
             include: {
-              companies: {
-                include: {
-                  company: true,
-                },
-              },
               departments: {
                 include: {
-                  department: true,
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
                 },
               },
             },
           },
-          items: true,
+          items: {
+            include: {},
+          },
           approval: {
             include: {
               user_approval: {
                 include: {
                   approver: true,
+                  item_category: true,
                 },
               },
             },
@@ -593,29 +364,21 @@ export class RequestFormService {
               user_verifier: true,
             },
           },
-          company: true,
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
         },
       });
-      return update;
-    } catch (error) {
-      this.logger.error(
-        error.message,
-        error.stack,
-        'RequestFormService.updateStatus()',
-      );
-      throw new InternalServerErrorException(
-        `Error occurred while updating requestForm status: ${error.message}`,
-      );
-    }
-  }
-
-  async remove(id: string) {
-    try {
-      await this.findOne(id);
-      const remove = await this.prismaService.requestionForm.delete({
-        where: { id },
-      });
-
       return remove;
     } catch (error) {
       this.logger.error(
@@ -629,5 +392,623 @@ export class RequestFormService {
     }
   }
 
-  
+  async update_status(id: string, status: string) {
+    try {
+      const findOne = await this.findOne(id);
+
+      if (!findOne) {
+        throw new BadRequestException('Request not found');
+      }
+
+      const update = await this.prismaService.requestionForm.update({
+        where: { id },
+        data: {
+          status,
+        },
+        include: {
+          requester: {
+            include: {
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          items: true,
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: true,
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
+        },
+      });
+
+      return update;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.update_status()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while updating request status: ${error.message}`,
+      );
+    }
+  }
+
+  async approval_process(id: string) {
+    const requestDetails = await this.findOne(id);
+
+    if (!requestDetails) {
+      throw new BadRequestException('Request not found');
+    }
+
+    const user_manager = requestDetails.requester.departments.map(
+      (department) => {
+        const manager = department.department.manager_id;
+        return manager;
+      },
+    );
+
+    const company = (position: POSITION) => {
+      if (position === POSITION.MANAGER) {
+        return user_manager.find((manger_id) => {
+          return requestDetails.company.departments.find((department) => {
+            return department.manager_id === manger_id;
+          });
+        });
+      } else if (position === POSITION.PRESIDENT) {
+        return requestDetails.company.president_id;
+      }
+    };
+
+    // check if the the request has an category name of the approval process
+    const approval_category_name = requestDetails.approval.user_approval.map(
+      (user_approval) => {
+        if (
+          user_approval.approver_type === APPROVER_TYPE.STATIC_APPROVER &&
+          user_approval.enable_condition
+        ) {
+          const unique_category_name = [
+            ...new Set(requestDetails.items.map((item) => item.item_category)),
+          ];
+
+          if (unique_category_name.includes(user_approval.item_category.name)) {
+            return user_approval.item_category_id;
+          }
+
+          return undefined;
+        }
+      },
+    );
+
+    try {
+      const approval_workflows = requestDetails.approval.user_approval.map(
+        (user_approval) => {
+          if (user_approval.approver_type === APPROVER_TYPE.MANAGER_APPROVER) {
+            return {
+              level: user_approval.level,
+              approver_type: user_approval.approver_type,
+              approver_id: company(POSITION.MANAGER),
+              enable_condition: user_approval.enable_condition,
+              category_name: user_approval.item_category_id || null,
+              status: user_approval.status,
+            };
+          } else if (
+            user_approval.approver_type === APPROVER_TYPE.PRESIDENT_APPROVER
+          ) {
+            return {
+              level: user_approval.level,
+              approver_type: user_approval.approver_type,
+              approver_id: company(POSITION.PRESIDENT),
+              enable_condition: user_approval.enable_condition,
+              category_name: user_approval.item_category_id || null,
+              status: user_approval.status,
+            };
+          } else if (
+            user_approval.approver_type === APPROVER_TYPE.STATIC_APPROVER &&
+            !user_approval.enable_condition
+          ) {
+            return {
+              level: user_approval.level,
+              approver_type: user_approval.approver_type,
+              approver_id: user_approval.approver_id,
+              enable_condition: user_approval.enable_condition,
+              category_name: user_approval.item_category_id || null,
+              status: user_approval.status,
+            };
+          } else if (
+            user_approval.approver_type === APPROVER_TYPE.STATIC_APPROVER &&
+            user_approval.enable_condition &&
+            approval_category_name
+              .filter((name) => name !== undefined)
+              .includes(user_approval.item_category_id)
+          ) {
+            return {
+              level: user_approval.level,
+              approver_type: user_approval.approver_type,
+              approver_id: user_approval.approver_id,
+              enable_condition: user_approval.enable_condition,
+              category_name: user_approval.item_category_id || null,
+              status: user_approval.status,
+            };
+          }
+        },
+      );
+
+      const filter_approval_workflows = approval_workflows.filter(
+        (workflow) => workflow !== undefined,
+      );
+
+      const approver_process = await this.prismaService.requestionForm.upsert({
+        where: { id },
+        create: {
+          approval_process: {
+            createMany: {
+              data: filter_approval_workflows.map((workflow) => {
+                return {
+                  level: workflow.level,
+                  approver_type: workflow.approver_type,
+                  approver_id: workflow.approver_id,
+                  enable_condition: workflow.enable_condition,
+                  categoty_name_id: workflow.category_name || null,
+                  status: workflow.status,
+                };
+              }),
+            },
+          },
+        },
+        update: {
+          approval_process: {
+            deleteMany: {},
+            createMany: {
+              data: filter_approval_workflows.map((workflow) => {
+                return {
+                  level: workflow.level,
+                  approver_type: workflow.approver_type,
+                  approver_id: workflow.approver_id,
+                  enable_condition: workflow.enable_condition,
+                  categoty_name_id: workflow.category_name || null,
+                  status: workflow.status,
+                };
+              }),
+            },
+          },
+        },
+        include: {
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+            },
+          },
+        },
+      });
+      return approver_process;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.approval_process()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while processing approval: ${error.message}`,
+      );
+    }
+  }
+
+  async verify_request(id: string, status: string, approval_id: string) {
+    try {
+      // Update the request form approval id and status
+      const verify = await this.prismaService.requestionForm.update({
+        where: { id },
+        data: {
+          isVerified: true,
+          status: status,
+          approval_id: approval_id,
+        },
+        include: {
+          requester: {
+            include: {
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          items: {
+            include: {},
+          },
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: true,
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
+        },
+      });
+      // create the approval process
+      await this.approval_process(id);
+      // return the updated request
+      return verify;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.verify_request()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while verifying request: ${error.message}`,
+      );
+    }
+  }
+
+  async update_request_status(
+    approval_process_id: string,
+    approval_process_status: APPROVAL_STATUS,
+    request_form_id: string,
+    request_form_status: string,
+    updateRequestFormInput?: UpdateRequestFormInput,
+    currentUser?: string,
+  ) {
+    try {
+      const findRequest = await this.findOne(request_form_id);
+      const findApprovalProcess =
+        await this.findOneApprovalProcess(approval_process_id);
+      const update_request_status =
+        await this.prismaService.requestionForm.update({
+          where: { id: findRequest.id },
+          data: {
+            status: request_form_status,
+            approval_process: {
+              update: {
+                where: { id: approval_process_id },
+                data: {
+                  status: approval_process_status,
+                  notes:
+                    updateRequestFormInput.notes.length > 0
+                      ? {
+                          createMany: {
+                            data: updateRequestFormInput.notes.map((note) => {
+                              return {
+                                name: `${approval_process_status} by ${currentUser}`,
+                                description: note.description,
+                                logs: `
+                                  Status has been updated to ${approval_process_status} by ${currentUser} with the following note: ${note.description} for Process ID ${approval_process_id}.
+                                `,
+                              };
+                            }),
+                          },
+                        }
+                      : undefined,
+                },
+              },
+            },
+            notes:
+              updateRequestFormInput.notes.length > 0
+                ? {
+                    createMany: {
+                      data: updateRequestFormInput.notes.map((note) => {
+                        return {
+                          name: `${approval_process_status} by ${currentUser}`,
+                          description: note.description,
+                          logs: `
+                      Status has been updated to ${approval_process_status} by ${currentUser} with the following note: ${note.description} for Process ID ${approval_process_id}.
+                    `,
+                        };
+                      }),
+                    },
+                  }
+                : undefined,
+          },
+          include: {
+            requester: {
+              include: {
+                departments: {
+                  include: {
+                    department: {
+                      include: {
+                        manager: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            items: true,
+            approval: {
+              include: {
+                user_approval: {
+                  include: {
+                    approver: true,
+                    item_category: true,
+                  },
+                },
+              },
+            },
+            requestForm_category: {
+              include: {
+                user_verifier: true,
+              },
+            },
+            company: {
+              include: {
+                president: true,
+                departments: true,
+              },
+            },
+            approval_process: {
+              include: {
+                approver: true,
+                category_name: true,
+              },
+            },
+          },
+        });
+      return update_request_status;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.update_request_status()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while updating request status: ${error.message}`,
+      );
+    }
+  }
+
+  async findOneApprovalProcess(id: string) {
+    try {
+      const approval_process =
+        await this.prismaService.approvalProcess.findUnique({
+          where: { id },
+          include: {
+            approver: true,
+            category_name: true,
+          },
+        });
+      return approval_process;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findOneApprovalProcess()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while finding approval process: ${error.message}`,
+      );
+    }
+  }
+
+  async approve_request(
+    approval_process_id: string,
+    approval_process_status: APPROVAL_STATUS,
+    request_form_status?: string | null,
+    updateRequestFormInput?: UpdateRequestFormInput,
+    currentUser?: string,
+  ) {
+    try {
+      const findApprovalProcess =
+        await this.findOneApprovalProcess(approval_process_id);
+
+      if (!findApprovalProcess) {
+        throw new BadRequestException('Approval process not found');
+      }
+
+      // Then get the count and all approval processes
+      const [count, findAllApprovalProcess] = await Promise.all([
+        this.prismaService.approvalProcess.count({
+          where: { requestFormId: findApprovalProcess.requestFormId },
+        }),
+        this.prismaService.approvalProcess.findMany({
+          where: { requestFormId: findApprovalProcess.requestFormId },
+          select: {
+            id: true,
+            approver: {
+              select: {
+                first_name: true,
+                last_name: true,
+              },
+            },
+          },
+          orderBy: { created_at: 'asc' },
+        }),
+      ]);
+
+      const currentIndex = findAllApprovalProcess.findIndex(
+        (process) => process.id === approval_process_id,
+      );
+
+      if (currentIndex === -1) {
+        throw new BadRequestException(
+          'Current approval process not found in sequence',
+        );
+      }
+
+      const next_approver = findAllApprovalProcess[currentIndex + 1];
+      const isLastApprover = currentIndex + 1 === count;
+      const approverName = `${findApprovalProcess.approver.first_name} ${findApprovalProcess.approver.last_name}`;
+
+      const last_approver = isLastApprover
+        ? request_form_status || 'ON-GOING'
+        : `${approval_process_status === 'APPROVED' ? 'APPROVED' : 'REJECTED'} by ${approverName}`;
+
+      // Update current status
+      const update_status = await this.update_request_status(
+        approval_process_id,
+        approval_process_status,
+        findApprovalProcess.requestFormId,
+        last_approver,
+        updateRequestFormInput,
+        currentUser,
+      );
+
+      // Only update next approver if exists
+      if (next_approver) {
+        await this.update_request_status(
+          next_approver.id,
+          APPROVAL_STATUS.PENDING,
+          findApprovalProcess.requestFormId,
+          last_approver,
+          updateRequestFormInput,
+          currentUser,
+        );
+      }
+
+      return update_status;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.approve_request()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while approving request: ${error.message}`,
+      );
+    }
+  }
+
+  async reject_request(
+    approval_process_id: string,
+    status: APPROVAL_STATUS,
+    updateRequestFormInput: UpdateRequestFormInput,
+  ) {
+    try {
+      const findOne = await this.findOneApprovalProcess(approval_process_id);
+
+      if (!findOne) {
+        throw new BadRequestException('Approval process not found');
+      }
+
+      const findAllApprovalProcess =
+        await this.prismaService.approvalProcess.findMany({
+          where: {
+            requestFormId: findOne.requestFormId,
+          },
+          include: {
+            approver: true,
+          },
+        });
+
+      const indexPosition = findAllApprovalProcess.findIndex(
+        (index) => index.id === approval_process_id,
+      );
+
+      if (indexPosition === 0) {
+        await this.update_status(
+          findOne.requestFormId,
+          `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
+        );
+        const update_approval_process =
+          await this.prismaService.approvalProcess.update({
+            where: { id: approval_process_id },
+            data: {
+              status,
+              notes:
+                updateRequestFormInput.notes.length > 0
+                  ? {
+                      createMany: {
+                        data: updateRequestFormInput.notes.map((note) => {
+                          return {
+                            name: `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
+                            description: note.description,
+                            logs: `
+                          Status has been updated to REJECTED by ${findOne.approver.first_name} ${findOne.approver.last_name} with the following note: ${note.description} for Process ID ${approval_process_id}.
+                        `,
+                          };
+                        }),
+                      },
+                    }
+                  : undefined,
+            },
+          });
+        return update_approval_process;
+      }
+
+      const previous_approver = findAllApprovalProcess[indexPosition - 1];
+
+      await this.prismaService.approvalProcess.update({
+        where: { id: previous_approver.id },
+        data: {
+          status: APPROVAL_STATUS.PENDING,
+        },
+      });
+
+      // Reject the current approval process
+      const reject_approval_process = await this.update_request_status(
+        approval_process_id,
+        status,
+        findOne.requestFormId,
+        `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
+        updateRequestFormInput,
+      );
+
+      return reject_approval_process;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.reject_request()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while rejecting request: ${error.message}`,
+      );
+    }
+  }
 }

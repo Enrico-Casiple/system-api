@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { LoggersService } from 'src/common/log/log.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateApprovalUserInput } from './dto/create-approval-user.input';
 import { UpdateApprovalUserInput } from './dto/update-approval-user.input';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-import { LoggersService } from 'src/common/log/log.service';
 
 @Injectable()
 export class ApprovalUserService {

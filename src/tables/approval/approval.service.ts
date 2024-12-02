@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { LoggersService } from 'src/common/log/log.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateApprovalInput } from './dto/create-approval.input';
 import { UpdateApprovalInput } from './dto/update-approval.input';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-import { LoggersService } from 'src/common/log/log.service';
 
 @Injectable()
 export class ApprovalService {
@@ -12,41 +12,35 @@ export class ApprovalService {
   ) {}
   async create(createApprovalInput: CreateApprovalInput) {
     try {
-      const create = await this.prismaService.approval.create({
+      const approval = await this.prismaService.approval.create({
         data: {
           name: createApprovalInput.name,
           description: createApprovalInput.description,
-          user_approval:
-            createApprovalInput.user_approval?.length > 0
-              ? {
-                  createMany: {
-                    data: createApprovalInput.user_approval.map((user) => {
-                      return {
-                        level: user.level,
-                        approver_id:
-                          user.approver_id?.length === 0
-                            ? null
-                            : user.approver_id,
-                        item_category_id:
-                          user.item_category_id?.length === 0
-                            ? null
-                            : user.item_category_id,
-                      };
-                    }),
-                  },
-                }
-              : undefined,
+          user_approval: {
+            createMany: {
+              data: createApprovalInput.user_approval.map((user) => {
+                return {
+                  level: user.level,
+                  approver_type: user.approver_type,
+                  approver_id: user.approver_id || null,
+                  enable_condition: user.enable_condition,
+                  item_category_id: user.item_category_id || null,
+                  status: user.status || 'PENDING',
+                };
+              }),
+            },
+          },
         },
         include: {
           user_approval: {
             include: {
               approver: true,
+              item_category: true,
             },
           },
         },
       });
-
-      return create;
+      return approval;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'ApprovalService.create()');
       throw new InternalServerErrorException(
@@ -62,9 +56,9 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
+              item_category: true,
             },
           },
-          requestion_forms: true,
         },
       });
       return approvals;
@@ -96,9 +90,9 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
+              item_category: true,
             },
           },
-          requestion_forms: true,
         },
       });
 
@@ -123,40 +117,40 @@ export class ApprovalService {
   async update(id: string, updateApprovalInput: UpdateApprovalInput) {
     try {
       await this.findOne(id);
-      const update = await this.prismaService.approval.update({
+
+      const approval = await this.prismaService.approval.update({
         where: {
-          id: id,
+          id,
         },
         data: {
           name: updateApprovalInput.name,
           description: updateApprovalInput.description,
-          user_approval:
-            updateApprovalInput.user_approval?.length > 0
-              ? {
-                  deleteMany: {},
-                  createMany: {
-                    data: updateApprovalInput.user_approval.map((user) => {
-                      return {
-                        level: user.level,
-                        approver_id: user.approver_id === '' ? null : user.approver_id,
-                        item_category_id: user.item_category_id === '' ? null : user.item_category_id,
-                      };
-                    }),
-                  },
-                }
-              : undefined,
+          user_approval: {
+            deleteMany: {},
+            createMany: {
+              data: updateApprovalInput.user_approval.map((user) => {
+                return {
+                  level: user.level,
+                  approver_type: user.approver_type,
+                  approver_id: user.approver_id || null,
+                  enable_condition: user.enable_condition,
+                  item_category_id: user.item_category_id || null,
+                };
+              }),
+            },
+          },
         },
         include: {
           user_approval: {
             include: {
               approver: true,
+              item_category: true,
             },
           },
-          requestion_forms: true,
         },
       });
 
-      return update;
+      return approval;
     } catch (error) {
       this.logger.error(error.message, error.stack, 'ApprovalService.update()');
       throw new InternalServerErrorException(
@@ -177,9 +171,9 @@ export class ApprovalService {
           user_approval: {
             include: {
               approver: true,
+              item_category: true,
             },
           },
-          requestion_forms: true,
         },
       });
       return approval;

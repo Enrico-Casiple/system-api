@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Notes } from '@prisma/client';
 import { CreateUserAccountInput } from 'src/tables/user-account/dto/create-user-account.input';
 
@@ -19,7 +19,10 @@ export class CreateNoteInput implements Notes {
   @Field(() => Date, { nullable: true })
   requestion_forms_id: string;
   @Field(() => Date, { nullable: true })
+  approval_process_id: string;
+  @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })
   updated_at: Date;
 }
+

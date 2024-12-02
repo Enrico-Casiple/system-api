@@ -39,26 +39,36 @@ export class SessionService {
             include: {
               user: {
                 include: {
+                  companies: {
+                    include: {
+                      company: {
+                        include: {
+                          president: true,
+                        },
+                      },
+                    },
+                  },
+                  departments: {
+                    include: {
+                      department: {
+                        include: {
+                          company: true,
+                          manager: true,
+                          supervisor: true,
+                          department_users: true,
+                        },
+                      },
+                    },
+                  },
                   company_president: {
                     include: {
                       president: true,
-                      departments: {
-                        include: {
-                          manager: true,
-                          supervisor: true,
-                          department_users: {
-                            include: {
-                              user: true,
-                            },
-                          },
-                        },
-                      },
                     },
                   },
                   department_manager: {
                     include: {
                       manager: true,
-                      supervisor: true,
+                      department_users: true,
                     },
                   },
                 },
@@ -68,7 +78,6 @@ export class SessionService {
                   permissions: true,
                 },
               },
-              notes: true,
             },
           },
         },

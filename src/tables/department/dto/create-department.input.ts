@@ -21,8 +21,6 @@ export class CreateDepartmentInput implements Department {
   supervisor: CreateUserInput;
   @Field(() => String, { nullable: true })
   supervisor_id: string | null;
-  @Field(() => [CreateDepartmentUserInput], { nullable: true })
-  department_users: CreateDepartmentUserInput[];
   @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })

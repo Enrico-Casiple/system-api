@@ -32,6 +32,7 @@ import { ApprovalUserModule } from './tables/approval-user/approval-user.module'
 import { CheckOutRequestFormModule } from './tables/check-out-request-form/check-out-request-form.module';
 import { RequestFormModule } from './tables/request-form/request-form.module';
 import { ItemModule } from './tables/item/item.module';
+import { CounterModule } from './common/counter/counter.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { ItemModule } from './tables/item/item.module';
     CheckOutRequestFormModule,
     RequestFormModule,
     ItemModule,
+    CounterModule,
   ],
   providers: [
     PrismaService,

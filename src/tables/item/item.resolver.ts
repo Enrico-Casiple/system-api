@@ -1,9 +1,11 @@
-import { Resolver, Query, Mutation, Args, Int, Subscription } from '@nestjs/graphql';
-import { ItemService } from './item.service';
-import { Item } from './entities/item.entity';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { ITEM_STATUS } from '@prisma/client';
+import { PubSub } from 'graphql-subscriptions';
+import { RequestItem } from '../request-form/entities/request-form.entity';
 import { CreateItemInput } from './dto/create-item.input';
 import { UpdateItemInput } from './dto/update-item.input';
-import { PubSub } from 'graphql-subscriptions';
+import { Item } from './entities/item.entity';
+import { ItemService } from './item.service';
 
 const pubSub = new PubSub();
 
@@ -14,7 +16,7 @@ export class ItemResolver {
   @Mutation(() => Item)
   createItem(@Args('createItemInput') createItemInput: CreateItemInput) {
     const createItem = this.itemService.create(createItemInput);
-    pubSub.publish('companyAdded', { companyAdded: createItem });
+    pubSub.publish('itemAdded', { itemAdded: createItem });
     return createItem;
   }
 
@@ -30,8 +32,11 @@ export class ItemResolver {
 
   @Mutation(() => Item)
   updateItem(@Args('updateItemInput') updateItemInput: UpdateItemInput) {
-    const updateItem = this.itemService.update(updateItemInput.id, updateItemInput);
-    pubSub.publish('companyAdded', { companyAdded: updateItem });
+    const updateItem = this.itemService.update(
+      updateItemInput.id,
+      updateItemInput,
+    );
+    pubSub.publish('itemAdded', { itemAdded: updateItem });
     return updateItem;
   }
 
@@ -40,8 +45,16 @@ export class ItemResolver {
     return this.itemService.remove(id);
   }
 
+  @Mutation(() => RequestItem)
+  item_status_update(
+    @Args('id', { type: () => String }) id: string,
+    @Args('item_status', { type: () => String }) item_status: ITEM_STATUS,
+  ) {
+    return this.itemService.item_status_update(id, item_status);
+  }
+
   @Subscription(() => Item)
-  companyAdded() {
-    return pubSub.asyncIterator('companyAdded');
+  itemAdded() {
+    return pubSub.asyncIterator('itemAdded');
   }
 }

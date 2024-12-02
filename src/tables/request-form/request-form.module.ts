@@ -9,6 +9,8 @@ import { UtilityService } from 'src/common/utility/utility.service';
 import { SendEmailService } from 'src/common/send-email/send-email.service';
 import { JwtService } from '@nestjs/jwt';
 import { RoleService } from '../role/role.service';
+import { CounterService } from 'src/common/counter/counter.service';
+import { ItemCategoryService } from '../item-category/item-category.service';
 
 @Module({
   providers: [
@@ -22,7 +24,7 @@ import { RoleService } from '../role/role.service';
     SendEmailService,
     JwtService,
     RoleService,
-
+    CounterService,
   ],
 })
 export class RequestFormModule {}

@@ -14,39 +14,14 @@ export class DepartmentService {
     private readonly userAccountService: UserAccountService,
     private readonly roleService: RoleService,
   ) {}
-  async create(
-    createDepartmentInput: CreateDepartmentInput,
-    currentUserId: string,
-  ) {
-    const find_user_account =
-      await this.userAccountService.findOne(currentUserId);
-
-    await this.roleService.checkAddPermission(
-      find_user_account.id,
-      'DEPARTMENT_MANAGEMENT',
-    );
-
+  async create(createDepartmentInput: CreateDepartmentInput) {
     try {
       const create_department = await this.prismaService.department.create({
         data: {
           name: createDepartmentInput.name,
           company_id: createDepartmentInput.company_id,
           manager_id: createDepartmentInput.manager_id,
-          supervisor_id: createDepartmentInput.supervisor_id,
-          department_users:
-            createDepartmentInput.department_users?.length > 0
-              ? {
-                  createMany: {
-                    data: createDepartmentInput.department_users?.map(
-                      (user) => {
-                        return {
-                          user_id: user.user_id,
-                        };
-                      },
-                    ),
-                  },
-                }
-              : undefined,
+          supervisor_id: createDepartmentInput.supervisor_id || undefined,
         },
         include: {
           company: true,
@@ -184,17 +159,7 @@ export class DepartmentService {
     }
   }
 
-  async update(
-    id: string,
-    updateDepartmentInput: UpdateDepartmentInput,
-    currentUserId: string,
-  ) {
-    const find_user_account =
-      await this.userAccountService.findOne(currentUserId);
-    await this.roleService.checkEditPermission(
-      find_user_account.id,
-      'DEPARTMENT_MANAGEMENT',
-    );
+  async update(id: string, updateDepartmentInput: UpdateDepartmentInput) {
     const existing_department = await this.findOne(id);
 
     try {
@@ -206,19 +171,7 @@ export class DepartmentService {
           name: updateDepartmentInput.name,
           company_id: updateDepartmentInput.company_id,
           manager_id: updateDepartmentInput.manager_id,
-          supervisor_id: updateDepartmentInput.supervisor_id,
-          department_users: {
-            deleteMany: {
-              department_id: id,
-            },
-            createMany: {
-              data: updateDepartmentInput.department_users.map((user) => {
-                return {
-                  user_id: user.user_id,
-                };
-              }),
-            },
-          },
+          supervisor_id: updateDepartmentInput.supervisor_id || undefined,
         },
         include: {
           company: true,
@@ -241,11 +194,7 @@ export class DepartmentService {
     }
   }
 
-  async remove(id: string, currentUserId: string) {
-    await this.roleService.checkDeletePermission(
-      currentUserId,
-      'DEPARTMENT_MANAGEMENT',
-    );
+  async remove(id: string) {
     try {
       const department = await this.findOne(id);
       const delete_department = await this.prismaService.department.delete({

@@ -1,6 +1,8 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { ITEM_STATUS } from '@prisma/client';
+import { ItemCategory } from 'src/tables/item-category/entities/item-category.entity';
 import { RequestForm } from 'src/tables/request-form/entities/request-form.entity';
+import { UnitOfMeasurement } from 'src/tables/unit-of-measurement/entities/unit-of-measurement.entity';
 
 @ObjectType()
 export class Item {
@@ -18,13 +20,14 @@ export class Item {
   total_price: number;
   @Field(() => String, { nullable: true })
   unit_of_measurement_id: string | null;
-  // unit_of_measurement
+  @Field(() => UnitOfMeasurement, { nullable: true })
+  unit_of_measurement: UnitOfMeasurement;
   @Field(() => String, { nullable: true })
   item_category_id: string | null;
-  // item_category
+  @Field(() => ItemCategory, { nullable: true })
+  item_category: ItemCategory;
   @Field(() => String, { nullable: true })
   supplier_id: string | null;
-  // supplier
   @Field(() => String, { nullable: true })
   requestion_forms_id: string | null;
   requestion_forms: RequestForm;

@@ -1,5 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { Item, ITEM_STATUS } from '@prisma/client';
+import { CreateItemCategoryInput } from 'src/tables/item-category/dto/create-item-category.input';
 
 @InputType()
 export class CreateItemInput implements Item {
@@ -19,6 +20,8 @@ export class CreateItemInput implements Item {
   unit_of_measurement_id: string | null;
   @Field(() => String, { nullable: true })
   item_category_id: string | null;
+  @Field(() => CreateItemCategoryInput, { nullable: true })
+  item_category: CreateItemCategoryInput;
   @Field(() => String, { nullable: true })
   supplier_id: string | null;
   @Field(() => String, { nullable: true })
@@ -29,4 +32,4 @@ export class CreateItemInput implements Item {
   created_at: Date;
   @Field(() => Date, { nullable: true })
   updated_at: Date;
-}
+};

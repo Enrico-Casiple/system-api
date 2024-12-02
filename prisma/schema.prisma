@@ -35,6 +35,7 @@ model User {
   requests               RequestionForm[]         @relation("Requester")
   requests_verifier      RequestionFormCategory[] @relation("Verifier")
   user_approval          ApprovalUser[]           @relation("Approver")
+  user_approval_process  ApprovalProcess[]        @relation()
   item_category_approval ItemCategory[]           @relation("SecondayApproval")
 
   created_at DateTime @default(now())
@@ -165,15 +166,16 @@ model Role {
 }
 
 model Permission {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  module  MODULE
-  view    Boolean @default(false)
-  add     Boolean @default(false)
-  edit    Boolean @default(false)
-  delete  Boolean @default(false)
-  verify  Boolean @default(false)
-  role_id String? @db.ObjectId
-  role    Role?   @relation("RolePermissions", fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  module   MODULE
+  view     Boolean @default(false)
+  add      Boolean @default(false)
+  edit     Boolean @default(false)
+  delete   Boolean @default(false)
+  verify   Boolean @default(false)
+  approver Boolean @default(false)
+  role_id  String? @db.ObjectId
+  role     Role?   @relation("RolePermissions", fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -189,6 +191,7 @@ enum MODULE {
   NOTE_MANAGEMENT
   REQUESTION_MANAGEMENT
   REQUESTION_CATEGORY_MANAGEMENT
+  ITEM_MANAGEMENT
   SUPPLIER_MANAGEMENT
   ITEM_CATEGORY_MANAGEMENT
   UNIT_OF_MEASUREMENT_MANAGEMENT
@@ -224,25 +227,44 @@ model Notes {
   requestion_forms_id String?         @db.ObjectId
   requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id])
 
+  approval_process_id String?         @db.ObjectId
+  approval_process    ApprovalProcess? @relation(fields: [approval_process_id], references: [id])
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@map("notes")
 }
 
+model Counter_Store {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  entity       Counter_Entity
+  increment_id Int            @default(0)
+  dateToCreate String
+  createDate   DateTime       @default(now())
+  updateDate   DateTime       @updatedAt
+
+  @@map("counter_store")
+}
+
+enum Counter_Entity {
+  PURCHASE_NUMBER
+}
+
 model RequestionForm {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  purchase_number String?
 
   //Whoe is requesting
-  user_id     String?   @db.ObjectId
-  requester   User?     @relation("Requester", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_id     String?        @db.ObjectId
+  requester   User?          @relation("Requester", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   // what are the items
-  items       Item[]
+  items       Request_item[]
   //Who is the approver
-  approval_id String?   @db.ObjectId
-  approval    Approval? @relation("ApproverList", fields: [approval_id], references: [id])
+  approval_id String?        @db.ObjectId
+  approval    Approval?      @relation("ApproverList", fields: [approval_id], references: [id])
 
-  status REQUESTION_STATUS @default(PENDING)
+  status String? @default("PENDING")
 
   requestForm_category_id String?                 @db.ObjectId
   requestForm_category    RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -250,6 +272,7 @@ model RequestionForm {
   company                 Company?                @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   notes                   Notes[]
   CheckOutRequestForm     CheckOutRequestForm?
+  approval_process        ApprovalProcess[]
 
   isVerified Boolean  @default(false)
   created_at DateTime @default(now())
@@ -261,11 +284,11 @@ model RequestionForm {
 enum REQUESTION_STATUS {
   DRAFT
   PENDING
-  VERIFY
   REJECTED
-  FIRST_APPROVAL
-  SECOND_APPROVAL
-  LAST_APPROVAL
+  VERIFY
+  MANAGER_APPROVAL
+  CHECKING_APPROVAL
+  PRESIDENT_APPROVAL
   ONGOING
   COMPLETED
 }
@@ -286,13 +309,29 @@ model RequestionFormCategory {
   @@map("requestion_form_category")
 }
 
+model Request_item {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                String?
+  description         String?
+  quantity            Int?
+  unit_of_measurement String?
+  item_category       String?
+  requestion_forms_id String?         @db.ObjectId
+  requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  item_status         ITEM_STATUS?    @default(PENDING)
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+
+  @@map("request_item")
+}
+
 model Item {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
   description String
   quantity    Int
-  price       Float
-  total_price Float
+  price       Float?
+  total_price Float?
 
   unit_of_measurement_id String?            @db.ObjectId
   unit_of_measurement    UnitOfMeasurement? @relation(fields: [unit_of_measurement_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -300,8 +339,6 @@ model Item {
   item_category          ItemCategory?      @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   supplier_id            String?            @db.ObjectId
   supplier               Supplier?          @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  requestion_forms_id    String?            @db.ObjectId
-  requestion_forms       RequestionForm?    @relation(fields: [requestion_forms_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   item_status ITEM_STATUS @default(PENDING)
 
@@ -345,8 +382,9 @@ model ItemCategory {
   user_approval_id String? @db.ObjectId
   user_approval    User?   @relation("SecondayApproval", fields: [user_approval_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  approval_user ApprovalUser[]
-  items         Item[]
+  approval_user   ApprovalUser[]
+  items           Item[]
+  ApprovalProcess ApprovalProcess[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -381,18 +419,53 @@ model Approval {
 }
 
 model ApprovalUser {
-  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
   level            Int? // Indicates the level of approval, e.g., 1 for first, 2 for second, etc.
-  approver_id      String?       @db.ObjectId
-  approver         User?         @relation("Approver", fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  item_category_id String?       @db.ObjectId
-  item_category    ItemCategory? @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  approval_id      String        @db.ObjectId
-  approval         Approval?     @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  created_at       DateTime      @default(now())
-  updated_at       DateTime      @updatedAt
+  approver_type    APPROVER_TYPE?   @default(STATIC_APPROVER)
+  approver_id      String?          @db.ObjectId
+  approver         User?            @relation("Approver", fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enable_condition Boolean          @default(false)
+  item_category_id String?          @db.ObjectId
+  item_category    ItemCategory?    @relation(fields: [item_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approval_id      String           @db.ObjectId
+  approval         Approval?        @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  status           APPROVAL_STATUS? @default(PENDING)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
 
   @@map("approval_user")
+}
+
+model ApprovalProcess {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  requestFormId    String?          @db.ObjectId
+  requestForm      RequestionForm?  @relation(fields: [requestFormId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  level            Int?
+  approver_type    APPROVER_TYPE?   @default(STATIC_APPROVER)
+  approver_id      String?          @db.ObjectId
+  approver         User?            @relation(fields: [approver_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enable_condition Boolean?         @default(false)
+  categoty_name_id String?          @db.ObjectId
+  category_name    ItemCategory?    @relation(fields: [categoty_name_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status           APPROVAL_STATUS? @default(PENDING)
+  notes            Notes[]
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  @@map("approval_process")
+}
+
+enum APPROVAL_STATUS {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum APPROVER_TYPE {
+  STATIC_APPROVER
+  MANAGER_APPROVER
+  SUPERVISOR_APPROVER
+  PRESIDENT_APPROVER
 }
 
 model CheckOutRequestForm {

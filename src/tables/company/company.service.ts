@@ -14,11 +14,7 @@ export class CompanyService {
     private readonly roleService: RoleService,
     private readonly userAccountService: UserAccountService,
   ) {}
-  async create(createCompanyInput: CreateCompanyInput, currentUserId: string) {
-    const find_user_account =
-      await this.userAccountService.findOne(currentUserId);
-
-
+  async create(createCompanyInput: CreateCompanyInput) {
     try {
       const create_company = await this.prisma.company.create({
         data: {
@@ -59,7 +55,6 @@ export class CompanyService {
   }
 
   async findAllByRolePermission(currentUserId: string) {
-
     try {
       return await this.findAll();
     } catch (error) {
@@ -143,14 +138,7 @@ export class CompanyService {
     }
   }
 
-  async update(
-    id: string,
-    updateCompanyInput: UpdateCompanyInput,
-    currentUserId: string,
-  ) {
-    const find_user_account =
-      await this.userAccountService.findOne(currentUserId);
-  
+  async update(id: string, updateCompanyInput: UpdateCompanyInput) {
     try {
       await this.findOne(id);
       const updateCompany = await this.prisma.company.update({
@@ -162,18 +150,6 @@ export class CompanyService {
           short_name: updateCompanyInput.short_name,
           location: updateCompanyInput.location,
           president_id: updateCompanyInput.president_id,
-          company_users: {
-            deleteMany: {
-              company_id: id,
-            },
-            createMany: {
-              data: updateCompanyInput.company_users.map((user) => {
-                return {
-                  user_id: user.user_id,
-                };
-              }),
-            },
-          },
         },
         include: {
           president: true,
@@ -195,13 +171,7 @@ export class CompanyService {
     }
   }
 
-  async remove(id: string, currentUserId: string) {
-    const find_user_account =
-      await this.userAccountService.findOne(currentUserId);
-    await this.roleService.checkDeletePermission(
-      find_user_account.id,
-      'COMPANY_MANAGEMENT',
-    );
+  async remove(id: string) {
     try {
       await this.findOne(id);
       const deleteCompany = await this.prisma.company.delete({
