@@ -25,6 +25,14 @@ export class ItemResolver {
     return this.itemService.findAll();
   }
 
+  @Query(() => [RequestItem], { name: 'findallRequestItem' })
+  findallRequestItem(
+    @Args('startData', { type: () => Date }) startData: Date,
+    @Args('endData', { type: () => Date }) endData: Date,
+  ) {
+    return this.itemService.findallRequestItem(startData, endData);
+  }
+
   @Query(() => Item, { name: 'item' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.itemService.findOne(id);

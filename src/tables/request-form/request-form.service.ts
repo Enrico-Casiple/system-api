@@ -171,6 +171,76 @@ export class RequestFormService {
     }
   }
 
+  async findAllRequestForm(startData: Date, endData: Date) {
+    try {
+      const requestForms = await this.prismaService.requestionForm.findMany({
+        where: {
+          created_at: {
+            gte: startData,
+            lte: endData,
+          },
+        },
+        include: {
+          requester: {
+            include: {
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          items: {
+            include: {},
+          },
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: true,
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          approval_process: {
+            include: {
+              approver: true,
+              category_name: true,
+              notes: true,
+            },
+          },
+        },
+      });
+
+      return requestForms;
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stack,
+        'RequestFormService.findAllRequestForm()',
+      );
+      throw new InternalServerErrorException(
+        `Error occurred while fetching requestForms: ${error.message}`,
+      );
+    }
+  }
+
   async findOne(id: string) {
     try {
       const requestForm = await this.prismaService.requestionForm.findUnique({

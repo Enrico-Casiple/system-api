@@ -26,13 +26,13 @@ export class RequestFormResolver {
     return this.requestFormService.findAll();
   }
 
-  // @Query(() => [RequestForm], { name: 'viewByRole' })
-  // viewByRole(
-  //   @Args('id', { type: () => String }) id: string,
-  // ) {
-  //   // return this.requestFormService.viewByRole(id);
-  //   return `This action returns a #${id} requestForm`;
-  // }
+  @Query(() => [RequestForm], { name: 'findAllRequestForm' })
+  findAllRequestForm(
+    @Args('startData', { type: () => Date }) startData: Date,
+    @Args('endData', { type: () => Date }) endData: Date,
+  ) {
+    return this.requestFormService.findAllRequestForm(startData, endData);
+  }
 
   @Query(() => RequestForm, { name: 'requestForm' })
   findOne(@Args('id', { type: () => String }) id: string) {
