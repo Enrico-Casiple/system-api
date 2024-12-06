@@ -19,12 +19,23 @@ export class RequestFormService {
   ) {}
 
   async create(createRequestFormInput: CreateRequestFormInput) {
+
+    const find_last_purchase_number =
+      await this.prismaService.requestionForm.findFirst({
+        orderBy: {
+          purchase_number: 'desc',
+        },
+      });
+
     try {
       const create = await this.prismaService.requestionForm.create({
         data: {
-          purchase_number: await this.counter.getCounter('PURCHASE_NUMBER'),
-          user_id: createRequestFormInput.user_id,
-          company_id: createRequestFormInput.company_id,
+          purchase_number: find_last_purchase_number
+            ? find_last_purchase_number.purchase_number + 1
+            : 88900,
+          user_id: createRequestFormInput.user_id || undefined,
+          company_id: createRequestFormInput.company_id || undefined,
+          department_id: createRequestFormInput.department_id || undefined,
           status: createRequestFormInput.status || 'PENDING',
           isVerified: false,
           approval_id: createRequestFormInput.approval_id || undefined,
@@ -82,6 +93,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -146,6 +162,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -216,6 +237,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -317,6 +343,7 @@ export class RequestFormService {
         data: {
           approval_id: updateRequestFormInput.approval_id || undefined,
           company_id: updateRequestFormInput.company_id || undefined,
+          department_id: updateRequestFormInput.department_id || undefined,
           status: updateRequestFormInput.status || 'PENDING',
           isVerified: updateRequestFormInput.isVerified,
           items: {
@@ -371,6 +398,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -440,6 +472,11 @@ export class RequestFormService {
               departments: true,
             },
           },
+          department: {
+            include: {
+              manager: true,
+            },
+          },
           approval_process: {
             include: {
               approver: true,
@@ -489,7 +526,9 @@ export class RequestFormService {
               },
             },
           },
-          items: true,
+          items: {
+            include: {},
+          },
           approval: {
             include: {
               user_approval: {
@@ -509,6 +548,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -545,6 +589,13 @@ export class RequestFormService {
       (department) => {
         const manager = department.department.manager_id;
         return manager;
+      },
+    );
+
+    //Find the depmatment in the request department return the manager id
+    const department = requestDetails.requester.departments.find(
+      (department) => {
+        return department.department_id === requestDetails.department_id;
       },
     );
 
@@ -674,10 +725,53 @@ export class RequestFormService {
           },
         },
         include: {
+          requester: {
+            include: {
+              departments: {
+                include: {
+                  department: {
+                    include: {
+                      manager: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          items: {
+            include: {},
+          },
+          approval: {
+            include: {
+              user_approval: {
+                include: {
+                  approver: true,
+                  item_category: true,
+                },
+              },
+            },
+          },
+          requestForm_category: {
+            include: {
+              user_verifier: true,
+            },
+          },
+          company: {
+            include: {
+              president: true,
+              departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
+            },
+          },
           approval_process: {
             include: {
               approver: true,
               category_name: true,
+              notes: true,
             },
           },
         },
@@ -741,6 +835,11 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
             },
           },
           approval_process: {
@@ -840,7 +939,9 @@ export class RequestFormService {
                 },
               },
             },
-            items: true,
+            items: {
+              include: {},
+            },
             approval: {
               include: {
                 user_approval: {
@@ -862,10 +963,16 @@ export class RequestFormService {
                 departments: true,
               },
             },
+            department: {
+              include: {
+                manager: true,
+              },
+            },
             approval_process: {
               include: {
                 approver: true,
                 category_name: true,
+                notes: true,
               },
             },
           },

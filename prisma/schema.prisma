@@ -112,6 +112,7 @@ model Department {
   supervisor_id String?  @db.ObjectId
 
   department_users Department_User[] @relation("Department")
+  requestion_forms RequestionForm[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -227,7 +228,7 @@ model Notes {
   requestion_forms_id String?         @db.ObjectId
   requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id])
 
-  approval_process_id String?         @db.ObjectId
+  approval_process_id String?          @db.ObjectId
   approval_process    ApprovalProcess? @relation(fields: [approval_process_id], references: [id])
 
   created_at DateTime @default(now())
@@ -252,8 +253,8 @@ enum Counter_Entity {
 }
 
 model RequestionForm {
-  id              String  @id @default(auto()) @map("_id") @db.ObjectId
-  purchase_number String?
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  purchase_number Int?
 
   //Whoe is requesting
   user_id     String?        @db.ObjectId
@@ -270,6 +271,8 @@ model RequestionForm {
   requestForm_category    RequestionFormCategory? @relation(fields: [requestForm_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   company_id              String?                 @db.ObjectId
   company                 Company?                @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  department_id           String?                 @db.ObjectId
+  department              Department?             @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   notes                   Notes[]
   CheckOutRequestForm     CheckOutRequestForm?
   approval_process        ApprovalProcess[]

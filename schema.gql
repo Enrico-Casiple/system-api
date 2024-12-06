@@ -239,7 +239,7 @@ type RequestItem {
 
 type RequestForm {
   id: String
-  purchase_number: String
+  purchase_number: Float
   user_id: String
   requester: User
   items: [RequestItem!]
@@ -250,6 +250,8 @@ type RequestForm {
   requestForm_category: RequestionFormCategory
   company_id: String
   company: Company
+  department_id: String
+  debugger: Department
   notes: [Note!]
   CheckOutRequestForm: CheckOutRequestForm
   approval_process: [ApprovalProcess!]
@@ -644,7 +646,7 @@ input CreateRequestionFormCategoryInput {
 
 input CreateRequestFormInput {
   id: String
-  purchase_number: String
+  purchase_number: Float
   user_id: String
   requester: CreateUserInput
   items: [CreateRequestItem!]
@@ -655,6 +657,8 @@ input CreateRequestFormInput {
   requestForm_category: CreateRequestionFormCategoryInput
   company_id: String
   company: CreateCompanyInput
+  department_id: String
+  department: CreateDepartmentInput
   notes: [CreateNoteInput!]
   CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean
@@ -814,7 +818,7 @@ input UpdateCheckOutRequestFormInput {
 
 input UpdateRequestFormInput {
   id: String
-  purchase_number: String
+  purchase_number: Float
   user_id: String
   requester: CreateUserInput
   items: [CreateRequestItem!]
@@ -825,6 +829,8 @@ input UpdateRequestFormInput {
   requestForm_category: CreateRequestionFormCategoryInput
   company_id: String
   company: CreateCompanyInput
+  department_id: String
+  department: CreateDepartmentInput
   notes: [CreateNoteInput!]
   CheckOutRequestForm: CreateCheckOutRequestFormInput
   isVerified: Boolean

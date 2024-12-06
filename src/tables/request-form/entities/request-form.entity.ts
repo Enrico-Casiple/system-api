@@ -10,6 +10,7 @@ import {
 import { Approval } from 'src/tables/approval/entities/approval.entity';
 import { CheckOutRequestForm } from 'src/tables/check-out-request-form/entities/check-out-request-form.entity';
 import { Company } from 'src/tables/company/entities/company.entity';
+import { Department } from 'src/tables/department/entities/department.entity';
 import { ItemCategory } from 'src/tables/item-category/entities/item-category.entity';
 import { Note } from 'src/tables/notes/entities/note.entity';
 import { RequestionFormCategory } from 'src/tables/requestion-form-category/entities/requestion-form-category.entity';
@@ -42,8 +43,8 @@ export class RequestItem implements Request_item {
 export class RequestForm implements PrismaRequestionForm {
   @Field(() => String, { nullable: true })
   id: string;
-  @Field(() => String, { nullable: true })
-  purchase_number: string;
+  @Field(() => Number, { nullable: true })
+  purchase_number: number;
   @Field(() => String, { nullable: true })
   user_id: string | null;
   @Field(() => User, { nullable: true })
@@ -64,6 +65,10 @@ export class RequestForm implements PrismaRequestionForm {
   company_id: string | null;
   @Field(() => Company, { nullable: true })
   company: Company;
+  @Field(() => String, { nullable: true })
+  department_id: string | null;
+  @Field(() => Department, { nullable: true })
+  debugger: Department;
   @Field(() => [Note], { nullable: true })
   notes: Note[];
   @Field(() => CheckOutRequestForm, { nullable: true })

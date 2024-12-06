@@ -10,6 +10,7 @@ import {
 import { CreateApprovalInput } from 'src/tables/approval/dto/create-approval.input';
 import { CreateCheckOutRequestFormInput } from 'src/tables/check-out-request-form/dto/create-check-out-request-form.input';
 import { CreateCompanyInput } from 'src/tables/company/dto/create-company.input';
+import { CreateDepartmentInput } from 'src/tables/department/dto/create-department.input';
 import { CreateItemCategoryInput } from 'src/tables/item-category/dto/create-item-category.input';
 import { CreateNoteInput } from 'src/tables/notes/dto/create-note.input';
 import { CreateRequestionFormCategoryInput } from 'src/tables/requestion-form-category/dto/create-requestion-form-category.input';
@@ -44,8 +45,8 @@ export class CreateRequestItem implements Request_item {
 export class CreateRequestFormInput implements RequestionForm {
   @Field(() => String, { nullable: true })
   id: string;
-  @Field(() => String, { nullable: true })
-  purchase_number: string | null;
+  @Field(() => Number, { nullable: true })
+  purchase_number: number | null;
   @Field(() => String, { nullable: true })
   user_id: string | null;
   @Field(() => CreateUserInput, { nullable: true })
@@ -66,6 +67,10 @@ export class CreateRequestFormInput implements RequestionForm {
   company_id: string;
   @Field(() => CreateCompanyInput, { nullable: true })
   company: CreateCompanyInput;
+  @Field(() => String, { nullable: true })
+  department_id: string;
+  @Field(() => CreateDepartmentInput, { nullable: true })
+  department: CreateDepartmentInput;
   @Field(() => [CreateNoteInput], { nullable: true })
   notes: CreateNoteInput[];
   @Field(() => CreateCheckOutRequestFormInput, { nullable: true })
