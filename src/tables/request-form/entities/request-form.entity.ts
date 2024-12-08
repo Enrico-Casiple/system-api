@@ -68,7 +68,7 @@ export class RequestForm implements PrismaRequestionForm {
   @Field(() => String, { nullable: true })
   department_id: string | null;
   @Field(() => Department, { nullable: true })
-  debugger: Department;
+  department: Department;
   @Field(() => [Note], { nullable: true })
   notes: Note[];
   @Field(() => CheckOutRequestForm, { nullable: true })

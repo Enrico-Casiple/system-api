@@ -251,7 +251,7 @@ type RequestForm {
   company_id: String
   company: Company
   department_id: String
-  debugger: Department
+  department: Department
   notes: [Note!]
   CheckOutRequestForm: CheckOutRequestForm
   approval_process: [ApprovalProcess!]

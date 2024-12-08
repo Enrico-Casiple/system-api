@@ -19,7 +19,6 @@ export class RequestFormService {
   ) {}
 
   async create(createRequestFormInput: CreateRequestFormInput) {
-
     const find_last_purchase_number =
       await this.prismaService.requestionForm.findFirst({
         orderBy: {
@@ -167,6 +166,11 @@ export class RequestFormService {
           department: {
             include: {
               manager: true,
+              company: {
+                include: {
+                  president: true,
+                },
+              },
             },
           },
           approval_process: {
@@ -281,6 +285,7 @@ export class RequestFormService {
                   department: {
                     include: {
                       manager: true,
+                      company: true,
                     },
                   },
                 },
@@ -309,6 +314,16 @@ export class RequestFormService {
             include: {
               president: true,
               departments: true,
+            },
+          },
+          department: {
+            include: {
+              manager: true,
+              company: {
+                include: {
+                  president: true,
+                },
+              },
             },
           },
           approval_process: {
@@ -585,13 +600,6 @@ export class RequestFormService {
       throw new BadRequestException('Request not found');
     }
 
-    const user_manager = requestDetails.requester.departments.map(
-      (department) => {
-        const manager = department.department.manager_id;
-        return manager;
-      },
-    );
-
     //Find the depmatment in the request department return the manager id
     const department = requestDetails.requester.departments.find(
       (department) => {
@@ -601,11 +609,7 @@ export class RequestFormService {
 
     const company = (position: POSITION) => {
       if (position === POSITION.MANAGER) {
-        return user_manager.find((manger_id) => {
-          return requestDetails.company.departments.find((department) => {
-            return department.manager_id === manger_id;
-          });
-        });
+        return department.department.manager_id;
       } else if (position === POSITION.PRESIDENT) {
         return requestDetails.company.president_id;
       }
