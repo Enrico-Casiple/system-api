@@ -75,12 +75,6 @@ export class RequestFormResolver {
 
     return update_status;
   }
-
-  @Subscription(() => RequestForm)
-  requestFormCreated() {
-    return pubSub.asyncIterator('requestFormCreated');
-  }
-
   @Mutation(() => RequestForm, { name: 'approval_process' })
   async approval_process(@Args('id', { type: () => String }) id: string) {
     const approval_process = await this.requestFormService.approval_process(id);
@@ -151,5 +145,10 @@ export class RequestFormResolver {
       requestFormCreated: reject_request,
     });
     return reject_request;
+  }
+
+  @Subscription(() => RequestForm)
+  requestFormCreated() {
+    return pubSub.asyncIterator('requestFormCreated');
   }
 }

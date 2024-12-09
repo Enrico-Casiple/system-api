@@ -442,7 +442,7 @@ model ApprovalUser {
 model ApprovalProcess {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
   requestFormId    String?          @db.ObjectId
-  requestForm      RequestionForm?  @relation(fields: [requestFormId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestForm      RequestionForm?  @relation(fields: [requestFormId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   level            Int?
   approver_type    APPROVER_TYPE?   @default(STATIC_APPROVER)
   approver_id      String?          @db.ObjectId

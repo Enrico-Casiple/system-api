@@ -881,8 +881,6 @@ export class RequestFormService {
   ) {
     try {
       const findRequest = await this.findOne(request_form_id);
-      const findApprovalProcess =
-        await this.findOneApprovalProcess(approval_process_id);
       const update_request_status =
         await this.prismaService.requestionForm.update({
           where: { id: findRequest.id },
@@ -1068,7 +1066,7 @@ export class RequestFormService {
 
       const last_approver = isLastApprover
         ? request_form_status || 'ON-GOING'
-        : `${approval_process_status === 'APPROVED' ? 'APPROVED' : 'REJECTED'} by ${approverName}`;
+        : `${approval_process_status === 'APPROVED' ? 'Waiting for' : 'Rejected by'} ${next_approver.approver.first_name} ${next_approver.approver.last_name}`;
 
       // Update current status
       const update_status = await this.update_request_status(
@@ -1109,6 +1107,7 @@ export class RequestFormService {
     approval_process_id: string,
     status: APPROVAL_STATUS,
     updateRequestFormInput: UpdateRequestFormInput,
+    currentUser?: string,
   ) {
     try {
       const findOne = await this.findOneApprovalProcess(approval_process_id);
@@ -1117,70 +1116,123 @@ export class RequestFormService {
         throw new BadRequestException('Approval process not found');
       }
 
-      const findAllApprovalProcess =
-        await this.prismaService.approvalProcess.findMany({
-          where: {
-            requestFormId: findOne.requestFormId,
-          },
-          include: {
-            approver: true,
-          },
-        });
-
-      const indexPosition = findAllApprovalProcess.findIndex(
-        (index) => index.id === approval_process_id,
-      );
-
-      if (indexPosition === 0) {
-        await this.update_status(
-          findOne.requestFormId,
-          `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
-        );
-        const update_approval_process =
-          await this.prismaService.approvalProcess.update({
-            where: { id: approval_process_id },
-            data: {
-              status,
-              notes:
-                updateRequestFormInput.notes.length > 0
-                  ? {
-                      createMany: {
-                        data: updateRequestFormInput.notes.map((note) => {
-                          return {
-                            name: `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
-                            description: note.description,
-                            logs: `
-                          Status has been updated to REJECTED by ${findOne.approver.first_name} ${findOne.approver.last_name} with the following note: ${note.description} for Process ID ${approval_process_id}.
-                        `,
-                          };
-                        }),
-                      },
-                    }
-                  : undefined,
-            },
-          });
-        return update_approval_process;
-      }
-
-      const previous_approver = findAllApprovalProcess[indexPosition - 1];
-
       await this.prismaService.approvalProcess.update({
-        where: { id: previous_approver.id },
+        where: { id: findOne.id },
         data: {
-          status: APPROVAL_STATUS.PENDING,
+          status: status,
+          notes:
+            updateRequestFormInput.notes.length > 0
+              ? {
+                  createMany: {
+                    data: updateRequestFormInput.notes.map((note) => {
+                      return {
+                        name: `Rejected by ${currentUser}`,
+                        description: note.description,
+                        logs: `Status has been updated to ${status} by ${currentUser} with the following note: ${note.description} for Process ID ${findOne.id}}`,
+                      };
+                    }),
+                  },
+                }
+              : undefined,
         },
       });
 
-      // Reject the current approval process
-      const reject_approval_process = await this.update_request_status(
-        approval_process_id,
-        status,
-        findOne.requestFormId,
-        `REJECTED BY ${findOne.approver.first_name} ${findOne.approver.last_name}`,
-        updateRequestFormInput,
-      );
-
-      return reject_approval_process;
+      const update_request_status =
+        await this.prismaService.requestionForm.update({
+          where: { id: findOne.requestFormId },
+          data: {
+            status: `Rejected by ${findOne.approver.first_name} ${findOne.approver.last_name}`,
+            isVerified: false,
+            approval_process: {
+              update: {
+                where: { id: findOne.id },
+                data: {
+                  status: status,
+                  notes:
+                    updateRequestFormInput.notes.length > 0
+                      ? {
+                          createMany: {
+                            data: updateRequestFormInput.notes.map((note) => {
+                              return {
+                                name: `${status} by ${currentUser}`,
+                                description: note.description,
+                                logs: `Status has been updated to ${status} by ${currentUser} with the following note: ${note.description} for Process ID ${findOne.id}}`,
+                              };
+                            }),
+                          },
+                        }
+                      : undefined,
+                },
+              },
+            },
+            notes:
+              updateRequestFormInput.notes.length > 0
+                ? {
+                    createMany: {
+                      data: updateRequestFormInput.notes.map((note) => {
+                        return {
+                          name: `${status} by ${currentUser}`,
+                          description: note.description,
+                          logs: `Status has been updated to ${status} by ${currentUser} with the following note: ${note.description} for Process ID ${findOne.id}.`,
+                        };
+                      }),
+                    },
+                  }
+                : undefined,
+          },
+          include: {
+            requester: {
+              include: {
+                departments: {
+                  include: {
+                    department: {
+                      include: {
+                        manager: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            items: {
+              include: {},
+            },
+            approval: {
+              include: {
+                user_approval: {
+                  include: {
+                    approver: true,
+                    item_category: true,
+                  },
+                },
+              },
+            },
+            requestForm_category: {
+              include: {
+                user_verifier: true,
+              },
+            },
+            company: {
+              include: {
+                president: true,
+                departments: true,
+              },
+            },
+            department: {
+              include: {
+                manager: true,
+              },
+            },
+            approval_process: {
+              include: {
+                approver: true,
+                category_name: true,
+                notes: true,
+              },
+            },
+          },
+        });
+      return update_request_status;
     } catch (error) {
       this.logger.error(
         error.message,
