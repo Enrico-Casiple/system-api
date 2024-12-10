@@ -149,37 +149,6 @@ export class RequestFormResolver {
 
   @Subscription(() => RequestForm)
   async requestFormCreated() {
-    // Webhook URL to be called
-    const webhookUrl =
-      'https://prod-57.southeastasia.logic.azure.com:443/workflows/44dc8bd5ef674d5996d4a812b687425f/triggers/manual/paths/invoke?api-version=2016-06-01';
-
-    // You can listen for the event and then trigger the webhook when the event occurs
-    const data = pubSub.asyncIterator('requestFormCreated');
-
-    // Make the HTTP request to the webhook using fetch
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          event: 'requestFormCreated',
-          data: data, // This is the data from your event, you can modify it as needed
-        }),
-      });
-
-      if (!response.ok) {
-        console.error(
-          'Failed to call webhook, response status:',
-          response.status,
-        );
-      }
-    } catch (error) {
-      console.error('Error calling webhook:', error);
-    }
-
-    // Return the data as the subscription payload
-    return data;
+    return pubSub.asyncIterator('requestFormCreated');
   }
 }
