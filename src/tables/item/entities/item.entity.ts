@@ -30,6 +30,7 @@ export class Item {
   supplier_id: string | null;
   @Field(() => String, { nullable: true })
   requestion_forms_id: string | null;
+  @Field(() => RequestForm, { nullable: true })
   requestion_forms: RequestForm;
   @Field(() => String, { nullable: true })
   item_status: ITEM_STATUS;

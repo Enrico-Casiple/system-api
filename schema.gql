@@ -173,6 +173,7 @@ type Item {
   item_category: ItemCategory
   supplier_id: String
   requestion_forms_id: String
+  requestion_forms: RequestForm
   item_status: String
   created_at: DateTime
   updated_at: DateTime
@@ -224,19 +225,6 @@ type CheckOutRequestForm {
   updated_at: DateTime
 }
 
-type RequestItem {
-  id: String
-  name: String
-  description: String
-  quantity: Float
-  unit_of_measurement: String
-  item_category: String
-  requestion_forms_id: String
-  item_status: String
-  created_at: DateTime
-  updated_at: DateTime
-}
-
 type RequestForm {
   id: String
   purchase_number: Float
@@ -256,6 +244,20 @@ type RequestForm {
   CheckOutRequestForm: CheckOutRequestForm
   approval_process: [ApprovalProcess!]
   isVerified: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type RequestItem {
+  id: String
+  name: String
+  description: String
+  quantity: Float
+  unit_of_measurement: String
+  item_category: String
+  requestion_forms_id: String
+  requestion_forms: RequestForm
+  item_status: String
   created_at: DateTime
   updated_at: DateTime
 }

@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Item, ITEM_STATUS } from '@prisma/client';
 import { CreateItemCategoryInput } from 'src/tables/item-category/dto/create-item-category.input';
 
@@ -32,4 +32,4 @@ export class CreateItemInput implements Item {
   created_at: Date;
   @Field(() => Date, { nullable: true })
   updated_at: Date;
-};
+}
