@@ -33,6 +33,7 @@ import { CheckOutRequestFormModule } from './tables/check-out-request-form/check
 import { RequestFormModule } from './tables/request-form/request-form.module';
 import { ItemModule } from './tables/item/item.module';
 import { CounterModule } from './common/counter/counter.module';
+import { DigitalOceanModule } from './common/digital-ocean/digital-ocean.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { CounterModule } from './common/counter/counter.module';
     RequestFormModule,
     ItemModule,
     CounterModule,
+    DigitalOceanModule,
   ],
   providers: [
     PrismaService,

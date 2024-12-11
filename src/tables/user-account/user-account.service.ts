@@ -1,17 +1,16 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import {
-  ChangePasswordInput,
-  LoginUserAccountInput,
-} from './dto/create-user-account.input';
-import { PrismaService } from 'src/common/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 import { LoggersService } from 'src/common/log/log.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 import {
   Hidden_Info,
   UtilityService,
 } from 'src/common/utility/utility.service';
 import { SessionService } from '../session/session.service';
-import { SendEmailService } from '../../common/send-email/send-email.service';
-import { ConfigService } from '@nestjs/config';
+import {
+  ChangePasswordInput,
+  LoginUserAccountInput,
+} from './dto/create-user-account.input';
 
 @Injectable()
 export class UserAccountService {
@@ -20,7 +19,6 @@ export class UserAccountService {
     private readonly logger: LoggersService,
     private readonly sessionService: SessionService,
     private readonly utilityService: UtilityService,
-    private readonly sendEmailService: SendEmailService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -219,8 +217,6 @@ export class UserAccountService {
       const session =
         await this.sessionService.updateOrCreateSession(token_info);
 
-  
-
       return session;
     } catch (error) {
       this.logger.error(
@@ -304,15 +300,6 @@ export class UserAccountService {
         user_id: userAccount.user_id,
         email: userAccount.email,
       } as Hidden_Info);
-
-      await this.sendEmailService.sendEmail({
-        from: this.configService.get('EMAIL_SERVER_HOST'),
-        to: userAccount.email,
-        reply_to: this.configService.get('REPLY_TO'),
-        subject: 'Reset Password',
-        token: reset_token,
-        type: 'change-password',
-      });
 
       return `Reset password email sent to ${userAccount.email}`;
     } catch (error) {

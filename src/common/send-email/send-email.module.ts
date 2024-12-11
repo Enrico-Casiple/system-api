@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { SendEmailService } from './send-email.service';
-import { LoggersService } from '../log/log.service';
 import { ConfigService } from '@nestjs/config';
+import { LoggersService } from '../log/log.service';
 
 @Module({
-  providers: [SendEmailService, LoggersService, ConfigService],
+  providers: [LoggersService, ConfigService],
 })
 export class SendEmailModule {}

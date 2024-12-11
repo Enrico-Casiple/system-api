@@ -1,14 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateSessionInput } from './dto/create-session.input';
-import { UpdateSessionInput } from './dto/update-session.input';
+import { ConfigService } from '@nestjs/config';
+import { LoggersService } from 'src/common/log/log.service';
 import {
   Hidden_Info,
   UtilityService,
 } from 'src/common/utility/utility.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
-import { LoggersService } from 'src/common/log/log.service';
-import { SendEmailService } from '../../common/send-email/send-email.service';
+import { CreateSessionInput } from './dto/create-session.input';
+import { UpdateSessionInput } from './dto/update-session.input';
 
 @Injectable()
 export class SessionService {
@@ -17,7 +16,6 @@ export class SessionService {
     private readonly configService: ConfigService,
     private readonly utilityService: UtilityService,
     private readonly prismaService: PrismaService,
-    private readonly sendEmailService: SendEmailService,
   ) {}
   create(createSessionInput: CreateSessionInput) {
     console.log('createSessionInput', createSessionInput);
@@ -150,13 +148,13 @@ export class SessionService {
               user: {
                 include: {
                   companies: {
-                  include: {
-                    company: {
-                      include: {
-                        president: true,
+                    include: {
+                      company: {
+                        include: {
+                          president: true,
+                        },
                       },
                     },
-                  },
                   },
                   departments: {
                     include: {
@@ -181,14 +179,14 @@ export class SessionService {
                       department_users: true,
                     },
                   },
-                }
+                },
               },
               role: {
                 include: {
                   permissions: true,
                 },
               },
-            }
+            },
           },
         },
       });
@@ -206,7 +204,7 @@ export class SessionService {
       // }
 
       delete sessions.user_account.password;
-      
+
       return sessions;
     } catch (error) {
       this.loggersService.error(

@@ -35,6 +35,10 @@ export class CreateRequestItem implements Request_item {
   requestion_forms_id: string | null;
   @Field(() => String, { nullable: true })
   item_status: ITEM_STATUS;
+  @Field(() => String, { nullable: true })
+  remarks: string;
+  @Field(() => String, { nullable: true })
+  attachment: string;
   @Field(() => Date, { nullable: true })
   created_at: Date;
   @Field(() => Date, { nullable: true })

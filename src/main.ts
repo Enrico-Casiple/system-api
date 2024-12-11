@@ -1,16 +1,17 @@
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
 import { ErrorHandlerFilter } from './common/error-handler/error-handler.filter';
-import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
   const PORT = configService.get<number>('PORT') || 5173;
 
-
   app.useGlobalFilters(new ErrorHandlerFilter());
+  // app.use(graphqlUploadExpress({ maxFileSize: 25000000, maxFiles: 3 }));
+
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

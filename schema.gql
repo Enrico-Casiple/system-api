@@ -258,6 +258,8 @@ type RequestItem {
   requestion_forms_id: String
   requestion_forms: RequestForm
   item_status: String
+  remarks: String
+  attachment: String
   created_at: DateTime
   updated_at: DateTime
 }
@@ -677,6 +679,8 @@ input CreateRequestItem {
   item_category: String
   requestion_forms_id: String
   item_status: String
+  remarks: String
+  attachment: String
   created_at: DateTime
   updated_at: DateTime
 }

@@ -49,7 +49,7 @@ export class RequestFormService {
                         quantity: item.quantity,
                         unit_of_measurement: item.unit_of_measurement,
                         item_category: item.item_category,
-                        item_status: item.item_status || 'PENDING',
+                        item_status: item.item_status || 'SOURCING',
                       };
                     }),
                   },
@@ -108,7 +108,10 @@ export class RequestFormService {
           },
         },
       });
-      await this.utility.notificationEmail(create);
+      await this.utility.notificationEmail({
+        method: 'create',
+        data: create,
+      });
       return create;
     } catch (error) {
       this.logger.error(
@@ -371,7 +374,7 @@ export class RequestFormService {
                   quantity: item.quantity,
                   unit_of_measurement: item.unit_of_measurement,
                   item_category: item.item_category,
-                  item_status: item.item_status || 'PENDING',
+                  item_status: item.item_status || 'SOURCING',
                 };
               }),
             },
@@ -428,6 +431,11 @@ export class RequestFormService {
             },
           },
         },
+      });
+
+      await this.utility.notificationEmail({
+        method: 'update',
+        data: update,
       });
 
       return update;
@@ -580,7 +588,10 @@ export class RequestFormService {
         },
       });
 
-      await this.utility.notificationEmail(update);
+      await this.utility.notificationEmail({
+        method: 'update_status',
+        data: update,
+      });
       return update;
     } catch (error) {
       this.logger.error(
@@ -825,7 +836,11 @@ export class RequestFormService {
             include: {
               user_approval: {
                 include: {
-                  approver: true,
+                  approver: {
+                    include: {
+                      user_approval: true,
+                    },
+                  },
                   item_category: true,
                 },
               },
@@ -859,6 +874,11 @@ export class RequestFormService {
       // create the approval process
       await this.approval_process(id);
       // return the updated request
+      await this.utility.notificationEmail({
+        method: 'verify',
+        approval_email: verify.approval.user_approval[0].approver.email,
+        data: verify,
+      });
       return verify;
     } catch (error) {
       this.logger.error(
@@ -999,6 +1019,7 @@ export class RequestFormService {
         await this.prismaService.approvalProcess.findUnique({
           where: { id },
           include: {
+            notes: true,
             approver: true,
             category_name: true,
           },
@@ -1044,6 +1065,7 @@ export class RequestFormService {
               select: {
                 first_name: true,
                 last_name: true,
+                email: true,
               },
             },
           },
@@ -1090,6 +1112,12 @@ export class RequestFormService {
           currentUser,
         );
       }
+
+      await this.utility.notificationEmail({
+        method: 'approve',
+        approval_email: next_approver?.approver?.email || '',
+        data: update_status,
+      });
 
       return update_status;
     } catch (error) {
@@ -1233,6 +1261,11 @@ export class RequestFormService {
             },
           },
         });
+      await this.utility.notificationEmail({
+        method: 'reject',
+        message: findOne.notes.at(-1).description,
+        data: update_request_status,
+      });
       return update_request_status;
     } catch (error) {
       this.logger.error(

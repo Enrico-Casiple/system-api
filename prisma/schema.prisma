@@ -322,6 +322,8 @@ model Request_item {
   requestion_forms_id String?         @db.ObjectId
   requestion_forms    RequestionForm? @relation(fields: [requestion_forms_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   item_status         ITEM_STATUS?    @default(PENDING)
+  remarks             String?
+  attachment          String?
   created_at          DateTime        @default(now())
   updated_at          DateTime        @updatedAt
 
