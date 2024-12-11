@@ -4,9 +4,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { APPROVAL_STATUS, APPROVER_TYPE, POSITION } from '@prisma/client';
-import { CounterService } from 'src/common/counter/counter.service';
 import { LoggersService } from 'src/common/log/log.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { UtilityService } from 'src/common/utility/utility.service';
 import { CreateRequestFormInput } from './dto/create-request-form.input';
 import { UpdateRequestFormInput } from './dto/update-request-form.input';
 
@@ -15,7 +15,7 @@ export class RequestFormService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly logger: LoggersService,
-    private readonly counter: CounterService,
+    private readonly utility: UtilityService,
   ) {}
 
   async create(createRequestFormInput: CreateRequestFormInput) {
@@ -108,7 +108,7 @@ export class RequestFormService {
           },
         },
       });
-
+      await this.utility.notificationEmail(create);
       return create;
     } catch (error) {
       this.logger.error(
@@ -580,6 +580,7 @@ export class RequestFormService {
         },
       });
 
+      await this.utility.notificationEmail(update);
       return update;
     } catch (error) {
       this.logger.error(

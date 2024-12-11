@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { LoggersService } from '../log/log.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 
 export type Hidden_Info = {
   user_account_id: string;
@@ -189,6 +189,39 @@ export class UtilityService {
       );
       throw new BadRequestException(
         `We have a problem in verify reset password token: ${error.message}`,
+      );
+    }
+  }
+
+  async notificationEmail(data: any) {
+    try {
+      await fetch(
+        'https://prod-01.southeastasia.logic.azure.com:443/workflows/edd3ef2937dd496886452526d76e1ad8/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5V0BkjEBJCfqcrm1oQ4nMqDFPsQnFgvPcm28EO5zsP8',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            data: data,
+          }),
+        },
+      ).then((response) => {
+        return {
+          response: {
+            response: response,
+            data: data,
+          },
+        };
+      });
+    } catch (error) {
+      this.loggersService.error(
+        `UtilityService.notificationEmail: ${error.message}`,
+        error.stack,
+        'UtilityService.notificationEmail',
+      );
+      throw new BadRequestException(
+        `We have a problem in send notification email: ${error.message}`,
       );
     }
   }
