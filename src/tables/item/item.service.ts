@@ -138,7 +138,11 @@ export class ItemService {
     }
   }
 
-  async item_status_update(id: string, item_status: ITEM_STATUS) {
+  async item_status_update(
+    id: string,
+    item_status: ITEM_STATUS,
+    remarks: string,
+  ) {
     try {
       const findOne = await this.primsaService.request_item.findUnique({
         where: {
@@ -156,6 +160,7 @@ export class ItemService {
         },
         data: {
           item_status: item_status,
+          remarks: remarks,
         },
       });
 

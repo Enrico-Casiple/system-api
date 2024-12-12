@@ -57,8 +57,9 @@ export class ItemResolver {
   item_status_update(
     @Args('id', { type: () => String }) id: string,
     @Args('item_status', { type: () => String }) item_status: ITEM_STATUS,
+    @Args('remarks', { type: () => String }) remarks: string,
   ) {
-    return this.itemService.item_status_update(id, item_status);
+    return this.itemService.item_status_update(id, item_status, remarks);
   }
 
   @Subscription(() => Item)

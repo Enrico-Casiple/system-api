@@ -397,7 +397,7 @@ type Mutation {
   createItem(createItemInput: CreateItemInput!): Item!
   updateItem(updateItemInput: UpdateItemInput!): Item!
   removeItem(id: String!): Item!
-  item_status_update(id: String!, item_status: String!): RequestItem!
+  item_status_update(id: String!, item_status: String!, remarks: String!): RequestItem!
 }
 
 input CreateUserInput {

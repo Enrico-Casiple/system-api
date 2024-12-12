@@ -50,6 +50,8 @@ export class RequestFormService {
                         unit_of_measurement: item.unit_of_measurement,
                         item_category: item.item_category,
                         item_status: item.item_status || 'SOURCING',
+                        attachment: item.attachment || null,
+                        remarks: item.remarks || null,
                       };
                     }),
                   },
@@ -353,6 +355,8 @@ export class RequestFormService {
   }
 
   async update(id: string, updateRequestFormInput: UpdateRequestFormInput) {
+    const findOne = await this.findOne(id);
+
     try {
       const update = await this.prismaService.requestionForm.update({
         where: {
@@ -375,6 +379,8 @@ export class RequestFormService {
                   unit_of_measurement: item.unit_of_measurement,
                   item_category: item.item_category,
                   item_status: item.item_status || 'SOURCING',
+                  attachment: item.attachment || null,
+                  remarks: item.remarks || null,
                 };
               }),
             },
@@ -871,12 +877,10 @@ export class RequestFormService {
           },
         },
       });
-      // create the approval process
       await this.approval_process(id);
-      // return the updated request
       await this.utility.notificationEmail({
         method: 'verify',
-        approval_email: verify.approval.user_approval[0].approver.email,
+        approval_email: verify.approval.user_approval[0].approver.email || '',
         data: verify,
       });
       return verify;
